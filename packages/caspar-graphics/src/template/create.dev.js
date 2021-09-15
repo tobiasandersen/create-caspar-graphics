@@ -1,9 +1,7 @@
-import { createTemplate } from './create'
+import { createTemplate as create } from './create'
 
-export default (async function() {
-  const { default: Template, previewData, previewImages } = await import(
-    process.env.DEV_TEMPLATES_DIR + '/' + document.title
-  )
+export function createTemplate(template) {
+  const { default: Template, previewData, previewImages } = template
 
   if (!Template) {
     return
@@ -29,5 +27,5 @@ export default (async function() {
     }
   }
 
-  createTemplate(Template)
-})()
+  create(template)
+}

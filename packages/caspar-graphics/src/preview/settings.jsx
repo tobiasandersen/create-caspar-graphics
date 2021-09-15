@@ -1,16 +1,9 @@
 import React from 'react'
 import { ChromePicker as ColorPicker } from 'react-color'
+import styles from './settings.module.css'
 
-const Row = ({ children, ...props }) => (
-  <div
-    css={`
-      margin-top: 5px;
-      margin-bottom: 15px;
-      display: flex;
-      align-items: center;
-    `}
-    {...props}
-  >
+const Row = ({ children, className, ...props }) => (
+  <div className={`${styles.row}${className ? ' ' + className : ''}`} {...props}>
     {children}
   </div>
 )
@@ -49,22 +42,12 @@ export default class Settings extends React.Component {
           />
           <label htmlFor="autoPreview">Auto Play</label>
         </Row>
-        <Row
-          css={`
-            flex-direction: column;
-            align-items: flex-start;
-            width: 160px;
-          `}
-        >
-          <div
-            css={`
-              display: flex;
-              width: 100%;
-              justify-content: space-between;
-            `}
-          >
-            <label htmlFor="autoPreview">Image Opacity</label>
+        <Row className={styles.opacityInput}>
+          <div>
+            <label htmlFor="opacity">Image Opacity</label>
             <input
+              id='opacity'
+              className={styles.numberInput}
               value={imageOpacity}
               type="number"
               step="0.1"
@@ -73,36 +56,10 @@ export default class Settings extends React.Component {
               onChange={evt => {
                 onChange('imageOpacity')(evt.target.value)
               }}
-              css={`
-                font-weight: 600;
-                border: none;
-                width: 30px;
-                text-align: center;
-                padding: 4px 0;
-                border-radius: 2px;
-                border: 1px solid transparent;
-                margin-top: -5px;
-
-                &::-webkit-inner-spin-button {
-                  display: none;
-                }
-
-                &:hover {
-                  border: 1px solid #ddd;
-                }
-
-                &:focus {
-                  border: 1px solid #0275ff;
-                }
-              `}
             />
           </div>
           <input
-            css={`
-              margin-top: 5px;
-              display: block;
-              width: 100%;
-            `}
+            className={styles.rangeInput}
             type="range"
             min="0"
             max="1"

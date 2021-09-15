@@ -1,3 +1,4 @@
+.caspar-graphics
 logs
 *.log
 npm-debug.log*

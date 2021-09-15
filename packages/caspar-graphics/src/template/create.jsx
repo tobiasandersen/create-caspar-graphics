@@ -3,21 +3,16 @@ import ReactDOM from 'react-dom'
 import { TemplateProvider } from '.'
 import { ClassWrapper } from './class-wrapper'
 
-export function createTemplate(Template) {
+export function createTemplate(template) {
+  const { default: Template } = template
+
   if (!Template) {
     return
   }
 
+  // TODO: Move to html creation.
   const isClassComponent = typeof Template.prototype?.render === 'function'
-
-  if (isClassComponent && Template.previewDataList) {
-    console.warn(
-      '[Caspar Graphics] `static previewDataList` will be removed in a future version. Move it to a named export, e.g. `export const previewData = {}`.'
-    )
-    window.previewData = Template.previewDataList
-  }
-
-  const size = Template.size || process.env.SIZE
+  const size = Template.size || { width: 1920, height: 1080 }
   const width = size?.width || 1920
   const height = size?.height || 1080
   const html = document.documentElement

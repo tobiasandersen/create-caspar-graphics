@@ -16,6 +16,7 @@ import isPlainObject from 'lodash/isPlainObject'
 import { usePersistentValue } from './use-persistent-value'
 import isHotkey from 'is-hotkey'
 import { States } from '../../'
+import styles from './controls.module.css'
 
 export const Controls = ({
   isPlaying,
@@ -85,28 +86,10 @@ export const Controls = ({
       onChange={index => {
         setSelectedTab(tabs[index])
       }}
-      css={`
-        display: flex;
-        flex: 1 0 0;
-        font-size: 13px;
-        flex-direction: column;
-        border: 1px solid #eaeaea;
-        border-radius: 4px;
-      `}
+      className={styles.tabs}
     >
-      <div
-        css={`
-          display: flex;
-          align-items: center;
-          background: #f3f3f3;
-          height: 24px;
-          padding: 0 10px;
-          border-bottom: 1px solid #ccc;
-          width: 100%;
-        `}
-      >
+      <div className={styles.header}>
         <Button
-          style={{ marginRight: 5 }}
           disabled={
             ![States.playing, States.loaded, States.paused].includes(state)
           }
@@ -124,7 +107,7 @@ export const Controls = ({
         <Button
           style={{ marginRight: 5 }}
           disabled={state !== States.playing && state !== States.paused}
-          title="Stop (F1)"
+          title='Stop (F1)'
           onClick={() => {
             stop()
           }}
@@ -139,57 +122,16 @@ export const Controls = ({
             width: 1
           }}
         />
-        <TabList
-          css={`
-            background: transparent;
-            display: flex;
-            align-items: center;
-            align-self: stretch;
-          `}
-        >
+        <TabList className={styles.tabList}>
           <Tab>Data</Tab>
           {isPlainObject(images) ? <Tab>Images</Tab> : null}
           <Tab>Settings</Tab>
         </TabList>
       </div>
-      <TabPanels
-        css={`
-          flex: 1 0 0;
-          display: flex;
-          flex-direction: column;
-          width: 100%;
-
-          & > div:not([hidden]) {
-            flex: 1 0 0;
-            display flex;
-            flex-direction: column;
-          }
-        `}
-      >
+      <TabPanels className={styles.tabPanels}>
         <TabPanel>
-          <div
-            css={`
-              display: grid;
-              grid-template-rows: 24px 1fr;
-              grid-template-columns: 1fr;
-              align-content: stretch;
-              align-items: stretch;
-              flex: 1 0 0;
-              width: 100%;
-            `}
-          >
-            <div
-              css={`
-                background: #f3f3f3;
-                border-bottom: 1px solid #ccc;
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                grid-gap: 10px;
-                font-size: 12px;
-                padding: 0 15px;
-              `}
-            >
+          <div className={styles.tabPanel}>
+            <div className={styles.tabPanelContent}>
               {Array.isArray(previewData.dataKeys) && (
                 <Select
                   value={previewData.selectedDataKey || ''}
@@ -200,27 +142,21 @@ export const Controls = ({
                   {previewData.dataKeys.map(key => (
                     <SelectOption
                       key={key}
-                      css={`
-                        cursor: default;
-                        font-weight: ${key === previewData.selectedDataKey
-                          ? 'bold'
-                          : 'normal'};
-                      `}
                       value={key}
+                      style={{
+                        cursor: 'default',
+                        fontWeight:
+                          key === previewData.selectedDataKey
+                            ? 'bold'
+                            : 'normal'
+                      }}
                     >
                       {key}
                     </SelectOption>
                   ))}
                 </Select>
               )}
-              <div
-                css={`
-                  flex: 1 0 0;
-                  font-size: 10px;
-                  display: flex;
-                  justify-content: flex-end;
-                `}
-              >
+              <div className={styles.buttonContainer}>
                 <Button
                   title={`Update (${getPrettySequence('mod+s')}, F6)`}
                   onClick={() => {
@@ -231,33 +167,18 @@ export const Controls = ({
                 </Button>
               </div>
             </div>
-            <div
-              css={`
-                position: relative;
-              `}
-            >
+            <div className={styles.editor}>
               <Editor ref={editorRef} value={data} />
             </div>
           </div>
         </TabPanel>
         {isPlainObject(images) ? (
           <TabPanel
-            css={`
-              overflow: overlay;
-            `}
+            style={{
+              overflow: 'overlay'
+            }}
           >
-            <div
-              css={`
-                display: grid;
-                grid-gap: 10px;
-                padding: 10px;
-                justify-content: start;
-                grid-template-columns: repeat(
-                  auto-fit,
-                  minmax(150px, max-content)
-                );
-              `}
-            >
+            <div className={styles.tabPanelImages}>
               {Object.entries(images).map(([key, url]) => (
                 <img
                   key={key}
@@ -269,18 +190,12 @@ export const Controls = ({
                       value: key === previewData.selectedImageKey ? null : key
                     })
                   }}
-                  css={`
-                    border-radius: 4px;
-                    border: 1px solid white;
-                    display: block;
-                    max-width: 288px;
-                    width: 100%;
-                    height: auto;
-
-                    ${key === previewData.selectedImageKey
-                      ? 'box-shadow: 0 0 0 2px #1b73e8'
-                      : 'box-shadow: 0 0 0 1px #ddd;'};
-                  `}
+                  style={{
+                    boxShadow:
+                      key === previewData.selectedImageKey
+                        ? '0 0 0 2px #1b73e8'
+                        : '0 0 0 1px #ddd'
+                  }}
                 />
               ))}
             </div>
@@ -295,28 +210,7 @@ export const Controls = ({
 }
 
 const Tab = ({ children }) => (
-  <ReachTab
-    css={`
-      &[data-reach-tab] {
-        transition: border-color 0.2s ease-in;
-        border-bottom: 1px solid transparent;
-        color: #444;
-        display: flex;
-        align-items: center;
-        transform: translateY(1px);
-        height: 100%;
-        display: flex;
-        padding: 0 12px;
-      }
-
-      &[data-reach-tab][data-selected] {
-        border-color: #1b73e8;
-        color: #222;
-      }
-    `}
-  >
-    {children}
-  </ReachTab>
+  <ReachTab className={styles.tab}>{children}</ReachTab>
 )
 
 const getNavigator = () => {

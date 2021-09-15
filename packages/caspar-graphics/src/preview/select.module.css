@@ -1,0 +1,23 @@
+.container {
+  border: none;
+  padding: 0;
+}
+
+.button[data-reach-listbox-button] {
+  border: none;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+
+.button[data-reach-listbox-button] > span {
+  margin-left: 3px;
+}
+
+.button svg {
+  font-size: 12px;
+}
+
+.option {
+  font-size: 12px;
+}

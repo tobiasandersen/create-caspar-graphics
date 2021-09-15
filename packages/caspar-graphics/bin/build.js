@@ -1,7 +1,5 @@
-#! /usr/bin/env node
+#!/usr/bin/env node
 'use strict'
-// Do this as the first thing so that any code reading it knows the right env.
-process.env.NODE_ENV = 'production'
 
 // Makes the script crash on unhandled rejections instead of silently
 // ignoring them. In the future, promise rejections that are not handled will
@@ -10,31 +8,21 @@ process.on('unhandledRejection', err => {
   throw err
 })
 
-// Ensure environment variables are read.
-require('../config/env')
-
-const webpack = require('webpack')
 const fs = require('fs-extra')
-const chalk = require('chalk')
 const path = require('path')
+const chalk = require('chalk')
+const { build: buildVite } = require('vite')
+const { inlineSource } = require('inline-source')
 const paths = require('../config/paths')
-const getClientEnv = require('../config/env').getClientEnv
-const packageJson = require(paths.appPackageJson)
-const { mode = '1080p', gzip = 'both' } = packageJson['caspar-graphics'] || {}
-const createConfig = require('../config/webpack.config.prod')
-const printErrors = require('../utils/printErrors')
-const formatWebpackMessages = require('react-dev-utils/formatWebpackMessages')
-const junk = require('junk')
-const commandLineArgs = require('command-line-args')
-const optionDefinitions = [
-  { name: 'include', alias: 'i', type: String, multiple: true },
-  { name: 'exclude', alias: 'e', type: String, multiple: true }
-]
+const options = require('../config/options')
+const { createConfig } = require('../config/vite.config.prod')
+const { createTemplateHtml } = require('../utils/html')
+const { getTemplates } = require('../utils/watcher')
+const { gzip } = require('../utils/gzip')
 
 async function build() {
-  const options = commandLineArgs(optionDefinitions, { argv: process.argv })
-  const allTemplates = fs.readdirSync(paths.appTemplates)
-  const templates = allTemplates.filter(junk.not).filter(template => {
+  const allTemplates = await getTemplates()
+  const templates = allTemplates.filter(template => {
     if (Array.isArray(options.include)) {
       return options.include.includes(template)
     }
@@ -63,108 +51,57 @@ async function build() {
     process.exit(0)
   }
 
-  // Remove all the templates we're about to build, but keep the directory
-  // so that if you're in it, you don't end up in Trash.
-  templates.forEach(template => {
-    try {
-      fs.unlinkSync(path.join(paths.appBuild, `${template}.html`))
-    } catch (err) {}
-  })
+  // Prepare build folders, one for the final output and one for Vite to put temporary files in.
+  fs.ensureDirSync(paths.appBuild)
+  fs.emptyDirSync(paths.viteBuild)
 
-  process.noDeprecation = true // turns off that loadQuery clutter.
   console.log(
     `\nBuilding graphics:\n\n${chalk.cyan(' ' + templates.join('\n '))}\n`
   )
 
-  // Check if `caspar-graphics` is linked (e.g. yarn link).
-  const isSymbolic = fs
-    .lstatSync(path.join(paths.appNodeModules, 'caspar-graphics'))
-    .isSymbolicLink()
+  for await (const template of templates) {
+    const tmpHtmlIn = path.join(paths.viteBuild, template, 'index.html')
+    const tmpHtmlOut = path.join(paths.viteBuild, template, 'out', 'index.html')
+    const htmlOut = path.join(paths.appBuild, template + '.html')
+    const gzipOut = htmlOut + '.gz'
 
-  const size = mode.startsWith('720p')
-    ? { width: 1280, height: 720 }
-    : { width: 1920, height: 1080 }
+    // Remove any old dist files.
+    fs.removeSync(htmlOut)
+    fs.removeSync(gzipOut)
 
-  for (const template of templates) {
-    const dotenv = getClientEnv({ templates: [template], mode, size })
-    const config = createConfig({
-      templates: [template],
-      dotenv,
-      isSymbolic,
-      gzip
+    // Create a temporary html file that Vite will use as its entry when building.
+    fs.outputFileSync(tmpHtmlIn, createTemplateHtml(template, true))
+
+    // Have Vite create a production bundle from the user's templates. The bundle
+    // will be placed in an "out" folder relative to its input.
+    await buildVite(createConfig(template))
+
+    // Take the production build we just produced, inline its assets into a single html file,
+    // and place that file into the user's dist folder.
+    const htmlContent = await inlineSource(tmpHtmlOut, {
+      rootpath: path.dirname(tmpHtmlOut),
+      attribute: false
     })
+    fs.outputFileSync(htmlOut, htmlContent)
 
-    await new Promise((resolve, reject) => {
-      compile(config, (err, stats) => {
-        let messages
+    // If gzip is enabled, zip the html file we just created.
+    if (options.gzip) {
+      fs.outputFileSync(gzipOut, '')
+      await gzip(htmlOut, gzipOut)
 
-        if (err) {
-          if (!err.message) {
-            return reject(err)
-          }
-
-          let errMessage = err.message
-
-          // Add additional information for postcss errors
-          if (Object.prototype.hasOwnProperty.call(err, 'postcssNode')) {
-            errMessage +=
-              '\nCompileError: Begins at CSS selector ' +
-              err['postcssNode'].selector
-          }
-
-          messages = formatWebpackMessages({
-            errors: [errMessage],
-            warnings: []
-          })
-        } else {
-          messages = formatWebpackMessages(
-            stats.toJson({ all: false, warnings: true, errors: true })
-          )
-        }
-        if (messages.errors.length) {
-          // Only keep the first error. Others are often indicative
-          // of the same problem, but confuse the reader with noise.
-          if (messages.errors.length > 1) {
-            messages.errors.length = 1
-          }
-          return reject(new Error(messages.errors.join('\n\n')))
-        }
-
-        // Remove html files.
-        if (gzip === true) {
-          fs.readdirSync(paths.appBuild).forEach(file => {
-            if (file.match(/.*\.html$/gi)) {
-              fs.unlinkSync(path.join(paths.appBuild, file))
-            }
-          })
-        }
-
-        return resolve()
-      })
-    })
+      // Remove the html file unless they want to keep both.
+      if (options.gzip !== 'both') {
+        fs.removeSync(htmlOut)
+      }
+    }
   }
-}
-
-// Wrap webpack compile in a try catch.
-function compile(config, cb) {
-  let compiler
-
-  try {
-    compiler = webpack(config)
-  } catch (e) {
-    printErrors('Failed to compile.', [e])
-    process.exit(1)
-  }
-
-  compiler.run((err, stats) => {
-    cb(err, stats)
-  })
 }
 
 build().then(
   () => {
     console.log(chalk.green('Built successfully.\n'))
     console.log()
+    process.exit()
   },
   err => {
     console.log(chalk.red('Failed to compile.\n'))

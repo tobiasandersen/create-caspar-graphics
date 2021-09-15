@@ -1,0 +1,29 @@
+.button {
+  background: none;
+  color: #6e6e6e;
+  outline: none;
+  border-radius: 4px;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  transition: color 0.2s ease;
+}
+
+.button:hover {
+  cursor: pointer;
+  color: #444;
+}
+
+.button:active {
+  cursor: pointer;
+  color: #6e6e6e;
+}
+
+.button[disabled] {
+  cursor: default;
+  color: #999;
+}

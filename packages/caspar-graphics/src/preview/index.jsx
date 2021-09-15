@@ -9,15 +9,14 @@ import {
 } from 'react-router-dom'
 import { Controls } from './controls'
 import { States } from '../../'
-import { Reset } from './reset'
 import { Screen } from './screen'
 import { usePersistentValue } from './use-persistent-value'
 import { usePreviewState } from './use-preview-state'
 import { usePreviewData } from './use-preview-data'
+import styles from './index.module.css'
+import { FaRegSadCry } from 'react-icons/fa'
 
-const templates = process.env.GRAPHIC_TEMPLATES
-
-export const Preview = ({ template }) => {
+export const Preview = ({ template, templates }) => {
   const [settings, setSettings] = usePersistentValue('settings', {
     autoPreview: false,
     background: '#ffffff',
@@ -25,8 +24,7 @@ export const Preview = ({ template }) => {
     imageOpacity: 0.5
   })
   const iframeRef = useRef()
-  const templateWindow =
-    state === States.loading ? null : iframeRef.current?.contentWindow
+  const templateWindow = iframeRef.current?.contentWindow
 
   const [state, setState] = usePreviewState({
     templateWindow,
@@ -39,19 +37,7 @@ export const Preview = ({ template }) => {
   })
 
   return (
-    <div
-      css={`
-        background: white;
-        width: 100%;
-        height: 100%;
-        box-sizing: border-box;
-        font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-        display: grid;
-        grid-template-rows: 1fr 240px;
-        padding: 20px;
-        overflow: hidden;
-      `}
-    >
+    <div className={styles.container}>
       <Screen
         template={template}
         background={settings.background}
@@ -68,15 +54,7 @@ export const Preview = ({ template }) => {
           }, 0)
         }}
       />
-      <div
-        css={`
-          align-items: stretch;
-          display: flex;
-          justify-content: space-between;
-          padding-top: 30px;
-          width: 100%;
-        `}
-      >
+      <div className={styles.links}>
         <div
           style={{
             alignItems: 'center',
@@ -142,20 +120,31 @@ export const Preview = ({ template }) => {
 }
 
 const App = () => {
+  const { templates } = window
+
+  if (templates.length === 0) {
+    return (
+      <div className={styles.empty}>
+        <FaRegSadCry />
+        <div>No templates found</div>
+        <div>
+          Make sure you use <span>.jsx</span> for your React files.
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <>
-      <Reset />
-      <Router>
-        <Switch>
-          {templates.map(template => (
-            <Route key={template} path={'/' + template}>
-              <Preview template={template} />
-            </Route>
-          ))}
-          <Redirect to={templates[0]} />
-        </Switch>
-      </Router>
-    </>
+    <Router>
+      <Switch>
+        {templates.map(template => (
+          <Route key={template} path={'/' + template}>
+            <Preview template={template} templates={templates} />
+          </Route>
+        ))}
+        <Redirect to={templates[0]} />
+      </Switch>
+    </Router>
   )
 }
 

@@ -1,6 +1,5 @@
 import React from 'react'
 import {
-  Listbox,
   ListboxInput,
   ListboxButton,
   ListboxPopover,
@@ -9,38 +8,16 @@ import {
 } from '@reach/listbox'
 import '@reach/listbox/styles.css'
 import { MdExpandMore } from 'react-icons/md'
+import styles from './select.module.css'
 
 export const Select = ({ children, value, onChange }) => {
   return (
     <ListboxInput
       value={value}
       onChange={onChange}
-      css={`
-        border: none;
-        padding: 0;
-      `}
+      className={styles.container}
     >
-      <ListboxButton
-        arrow={
-          <MdExpandMore
-            css={`
-              font-size: 12px;
-            `}
-          />
-        }
-        css={`
-          &[data-reach-listbox-button] {
-            border: none;
-            padding: 0;
-            display: flex;
-            align-items: center;
-
-            & > span {
-              margin-left: 3px;
-            }
-          }
-        `}
-      />
+      <ListboxButton className={styles.button} arrow={<MdExpandMore />} />
       <ListboxPopover>
         <ListboxList>{children}</ListboxList>
       </ListboxPopover>
@@ -50,12 +27,7 @@ export const Select = ({ children, value, onChange }) => {
 
 export const SelectOption = ({ children, value }) => {
   return (
-    <ListboxOption
-      value={value}
-      css={`
-        font-size: 12px;
-      `}
-    >
+    <ListboxOption value={value} className={styles.option}>
       {children}
     </ListboxOption>
   )

@@ -44,6 +44,8 @@ const appPath = resolveApp('.')
 
 module.exports = {
   appPath,
+  viteDev: path.join(appPath, '.caspar-graphics', 'dev'),
+  viteBuild: path.join(appPath, '.caspar-graphics', 'build'),
   dotenv: resolveApp('.env'),
   appBuild: resolveApp('dist'),
   appNodeModules: resolveApp('node_modules'),

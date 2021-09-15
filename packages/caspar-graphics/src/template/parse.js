@@ -1,5 +1,5 @@
 import { Base64 } from 'js-base64'
-import { parseString as parseXML } from 'xml2js'
+import parser from 'fast-xml-parser'
 import queryString from 'querystring'
 
 export function getQueryData() {
@@ -31,15 +31,7 @@ export function parse(str) {
 }
 
 function parseXML2(xml) {
-  let params
-  parseXML(xml, (err, result) => {
-    if (err) {
-      throw err
-    } else {
-      params = result
-    }
-  })
-
+  const params = parser.parse(xml)
   const result = {}
 
   for (const val of params.templateData.componentData || []) {
