@@ -13,10 +13,88 @@ import Settings from './settings'
 import { Select, SelectOption } from './select'
 import '@reach/tabs/styles.css'
 import isPlainObject from 'lodash/isPlainObject'
+import isEqual from 'lodash/isEqual'
 import { usePersistentValue } from './use-persistent-value'
 import isHotkey from 'is-hotkey'
 import { States } from '../../'
 import styles from './controls.module.css'
+import { Leva as Leva2, buttonGroup, useControls, folder, button, levaStore } from "leva"
+
+function Leva ({ previewData, settings }) {
+  const { data, dataKeys } = previewData
+  const [changes, setChanges] = React.useState()
+  const hasChanges = changes && !isEqual(data, changes)
+
+  const update = () => {
+    const payload = {}
+    const levaData = levaStore.getData()
+
+    for (const key of Object.keys(data)) {
+      payload[key] = levaData[key].value
+    }
+
+    previewData.onChange({ type: 'data', value: payload })
+  }
+
+  const schema = {
+    Commands: buttonGroup({
+      Play: () => {},
+      Stop: () => {},
+      'Update': update
+    }),
+  }
+
+  if (Array.isArray(dataKeys)) {
+    schema.Presets = folder(
+      Object.fromEntries(dataKeys.map(key => [key, button(() => {})])),
+      { collapsed: true }
+    )
+  }
+
+  for (const [key, value] of Object.entries(data)) {
+    schema[key] = {
+      value,
+      onChange: (value, ...args) => {
+        setChanges(changes => ({ ...changes, [key]: value }))
+      }
+    }
+  }
+
+  schema.Settings = folder(
+    {
+      autoPreview: { value: settings.autoPreview, label: 'Auto Preview' },
+      background: { value: settings.background, label: 'Background' },
+      showImage: { value: settings.showImage, label: 'Show Image' },
+      imageOpacity: {
+        value: settings.imageOpacity,
+        label: 'Image Opacity',
+        min: 0,
+        max: 1
+      }
+    },
+    { collapsed: true }
+  )
+
+  useControls(schema)
+
+  return (
+    <div
+      className={`${styles.leva}${hasChanges ? ` ${styles.changes}` : ''}`}
+      onKeyDown={evt => {
+        if (evt.key !== 'Enter') {
+          return
+        }
+
+        setTimeout(() => {
+          update()
+        }, 0)
+
+      }}
+    >
+      <Leva2 />
+    </div>
+  )
+}
 
 export const Controls = ({
   isPlaying,
@@ -88,6 +166,7 @@ export const Controls = ({
       }}
       className={styles.tabs}
     >
+      {Object.keys(data).length > 0 && <Leva previewData={previewData} settings={settings} />}
       <div className={styles.header}>
         <Button
           disabled={
@@ -170,6 +249,7 @@ export const Controls = ({
             <div className={styles.editor}>
               <Editor ref={editorRef} value={data} />
             </div>
+
           </div>
         </TabPanel>
         {isPlainObject(images) ? (

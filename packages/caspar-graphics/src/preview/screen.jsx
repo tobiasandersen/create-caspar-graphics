@@ -1,43 +1,29 @@
-import React, { useRef, useState } from 'react'
+import React, { useRef } from 'react'
 import { useRect } from '@reach/rect'
 import styles from './screen.module.css'
 
-export const Screen = ({ template, background, iframeRef, onLoad, image }) => {
+export const Screen = ({ size = window.size, children, settings }) => {
   const containerRef = useRef()
   const containerRect = useRect(containerRef)
-  const [templateSize, setTemplateSize] = useState()
 
   return (
     <div ref={containerRef} className={styles.container}>
       <div
         className={styles.screen}
         style={{
-          background,
-          width: templateSize?.width || 0,
-          height: templateSize?.height || 0,
-          transform: `scale(${calcScale(containerRect, templateSize)})
+          background: settings.background,
+          width: size?.width || 0,
+          height: size?.height || 0,
+          transform: `scale(${calcScale(containerRect, size)})
           translate(-50%, -50%)`
         }}
       >
-        <iframe
-          ref={iframeRef}
-          src={`/${template}.html`}
-          onLoad={() => {
-            const {
-              offsetWidth: width,
-              offsetHeight: height
-            } = iframeRef.current.contentWindow.document.body
-            setTemplateSize({ width, height })
-            onLoad()
-          }}
-        />
-        {image.src != null ? (
+        {children}
+        {settings.image ? (
           <img
-            src={image.src}
+            src={settings.image}
             className={styles.image}
-            style={{
-               opacity: image.opacity
-            }}
+            style={{ opacity: settings.imageOpacity ?? 0 }}
           />
         ) : null}
       </div>

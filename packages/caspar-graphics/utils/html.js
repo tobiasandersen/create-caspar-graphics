@@ -83,6 +83,7 @@ const createPreviewHtml = templates => {
         <script type="module">
           window.templates = ${JSON.stringify(templates)}
           window.size = ${JSON.stringify(size)}
+          window.projectName = '${appName}'
         </script>
         <script type="module" src="${previewPath}"></script>
       </body>

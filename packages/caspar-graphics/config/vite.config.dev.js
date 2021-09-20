@@ -17,17 +17,15 @@ const createConfig = port =>
         allow: [paths.ownPath, paths.appPath]
       }
     },
-    plugins: [reactRefresh(), monacoEditorPlugin()],
+    plugins: [monacoEditorPlugin()],
     // Without this we have problems when running caspar-graphics in a linked context.
     resolve: {
       dedupe: ['react', 'react-dom'],
       react: require.resolve(path.join(paths.ownNodeModules, 'react')),
-      'react-dom': require.resolve(
-        path.join(paths.ownNodeModules, 'react-dom')
-      ),
-      'react-refresh/runtime': require.resolve(
-        path.join(paths.ownNodeModules, 'react-refresh/runtime')
-      )
+      'react-dom': require.resolve(path.join(paths.ownNodeModules, 'react-dom'))
+      // 'react-refresh/runtime': require.resolve(
+      //   path.join(paths.ownNodeModules, 'react-refresh/runtime')
+      // )
     }
   })
 

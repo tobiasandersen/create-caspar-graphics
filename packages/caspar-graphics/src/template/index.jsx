@@ -47,7 +47,6 @@ export const TemplateProvider = ({ children, name }) => {
   useEffect(() => {
     window.update = data => {
       try {
-        console.log(data)
         data = typeof data === 'string' ? parse(data) : data
       } catch (err) {
         console.error(err)

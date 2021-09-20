@@ -1,14 +1,26 @@
 .container {
-  background: white;
+  background: #292d39;
   width: 100%;
   height: 100%;
   box-sizing: border-box;
-  display: grid;
-  grid-template-rows: 1fr 240px;
-  padding: 20px;
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
   font-family: sans-serif;
+  position: relative;
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-columns: 300px 1fr;
+  align-items: center;
+}
+
+.screen {
+  box-shadow: rgba(0, 0, 0, 0.5) 0px 20px 100px -20px;
+  box-sizing: content-box;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  overflow: hidden;
+  transform-origin: top left;
 }
 
 .links {
