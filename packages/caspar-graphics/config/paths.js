@@ -41,14 +41,15 @@ const nodePaths = (process.env.NODE_PATH || '')
   .map(resolveApp)
 
 const appPath = resolveApp('.')
+const appNodeModules = resolveApp('node_modules')
 
 module.exports = {
   appPath,
-  viteDev: path.join(appPath, '.caspar-graphics', 'dev'),
-  viteBuild: path.join(appPath, '.caspar-graphics', 'build'),
+  viteDev: path.join(appNodeModules, '.caspar-graphics', 'dev'),
+  viteBuild: path.join(appNodeModules, '.caspar-graphics', 'build'),
   dotenv: resolveApp('.env'),
   appBuild: resolveApp('dist'),
-  appNodeModules: resolveApp('node_modules'),
+  appNodeModules,
   appSrc: resolveApp('src'),
   appPackageJson: resolveApp('package.json'),
   appTemplates: resolveApp('src/templates'),

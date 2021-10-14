@@ -1,7 +1,6 @@
 const { defineConfig } = require('vite')
 const path = require('path')
 const paths = require('../config/paths')
-const { default: monacoEditorPlugin } = require('vite-plugin-monaco-editor')
 const options = require('./options')
 const reactRefresh = require('@vitejs/plugin-react-refresh')
 
@@ -17,7 +16,6 @@ const createConfig = port =>
         allow: [paths.ownPath, paths.appPath]
       }
     },
-    plugins: [monacoEditorPlugin()],
     // Without this we have problems when running caspar-graphics in a linked context.
     resolve: {
       dedupe: ['react', 'react-dom'],
