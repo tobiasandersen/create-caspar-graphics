@@ -6,6 +6,7 @@ const FramerMotion = () => {
   const { state, data, safeToRemove } = useCaspar()
   const { text } = data
   const isVisible = text && state === States.playing
+  console.log(1, { text, isVisible })
 
   return (
     <motion.div
@@ -37,6 +38,6 @@ const FramerMotion = () => {
   )
 }
 
-FramerMotion.previewData = { text: 'FramerMotion Text' }
+export const previewData = { text: 'FramerMotion Text' }
 
 export default FramerMotion

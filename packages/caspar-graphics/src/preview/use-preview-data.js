@@ -1,34 +1,14 @@
 import React, { useState, useEffect } from 'react'
-import { useLocation, useHistory } from 'react-router-dom'
 import isPlainObject from 'lodash/isPlainObject'
-import queryString from 'query-string'
-import { States } from '..'
 
-export function usePreviewData({ templateWindow, state, ...props }) {
-  const [previewData, setPreviewData] = useState()
-  const [previewImages, setPreviewImages] = useState(null)
-  const [initialPreset] = React.useState(props.initialPreset)
-
-  // HACK: We use this to force updates when a template is reloaded.
-  // There're definitely better ways to do this, but I feel lazy...
-  const [reloads, setReloads] = useState(0)
-
-  // Get preview data for the current template.
-  useEffect(() => {
-    if (state !== States.loaded) {
-      return
-    }
-
-    setReloads(curr => curr + 1)
-
-    setPreviewData(templateWindow.previewData || null)
-
-    if (templateWindow?.previewImages) {
-      setPreviewImages(templateWindow.previewImages)
-    }
-  }, [state])
-
-  const values = Object.values(previewData || {})
+export function usePreviewData({
+  presets,
+  images,
+  templateWindow,
+  initialPreset
+}) {
+  const [previewData, setPreviewData] = useState(null)
+  const values = Object.values(presets || {})
   const hasManyPreviewSets =
     values.length > 1 && values.every(value => isPlainObject(value))
 
@@ -48,14 +28,14 @@ export function usePreviewData({ templateWindow, state, ...props }) {
     if (templateWindow?.update) {
       templateWindow.update(data || {})
     }
-  }, [templateWindow, data, reloads])
+  }, [templateWindow, data])
 
   return {
     // selectedDataKey,
     // selectedImageKey: params.imageKey,
     data: data || {},
     previewData,
-    images: previewImages,
+    images,
     // image: previewImages?.[params.imageKey],
     dataKeys: hasManyPreviewSets ? Object.keys(previewData) : null,
     clearChanges: () => {

@@ -1,5 +1,5 @@
 import ReactDOM from 'react-dom'
-import React, { useRef } from 'react'
+import React, { useState } from 'react'
 import { States } from '../../'
 import { Screen } from './screen'
 import { usePersistentValue } from './use-persistent-value'
@@ -9,10 +9,15 @@ import { FaRegSadCry } from 'react-icons/fa'
 import { Leva } from './leva'
 import styles from './index.module.css'
 
-const App = () => {
+export default function PreviewApp({
+  templateNames,
+  templatePreviews,
+  projectName,
+  projectSize
+}) {
   const [templates, setTemplates] = React.useState({})
   const [templateSettings, setTemplateSettings] = usePersistentValue(
-    `cg.${window.projectName}.templates`,
+    `cg.${projectName}.templates`,
     {}
   )
   const [settings, setSettings] = usePersistentValue('settings', {
@@ -22,7 +27,7 @@ const App = () => {
     imageOpacity: 0.5
   })
 
-  if (window.templates.length === 0) {
+  if (templateNames.length === 0) {
     return (
       <div className={styles.empty}>
         <FaRegSadCry />
@@ -34,7 +39,7 @@ const App = () => {
     )
   }
 
-  const templateNames = [...window.templates].sort((a, b) => {
+  const sortedTemplates = [...templateNames].sort((a, b) => {
     if (a < b) {
       return -1
     } else if (b < a) {
@@ -46,8 +51,9 @@ const App = () => {
 
   const schema = {}
 
-  for (let i = 0; i < templateNames.length; i++) {
-    const key = templateNames[i]
+  for (let i = 0; i < sortedTemplates.length; i++) {
+    const key = sortedTemplates[i]
+    const previewData = templatePreviews[i]
     const template = templates[key]
     const state = templateSettings[key] || {}
 
@@ -59,7 +65,7 @@ const App = () => {
       layer: state.layer ?? i + 1,
       preset: state.preset || '',
       collapsed: state.collapsed ?? false,
-      previewData: template.data.previewData || {},
+      previewData,
       previewImages: template.data.images,
       data: template.data.data,
       play: () => {
@@ -84,7 +90,7 @@ const App = () => {
     setTemplates(value => ({ ...value, [template]: { data, setState } }))
   }, [])
 
-  const isReady = templateNames.every(template => schema[template] != null)
+  const isReady = sortedTemplates.every(template => schema[template] != null)
 
   return (
     <div className={styles.container}>
@@ -112,14 +118,15 @@ const App = () => {
           console.log('updateAll', data)
         }}
       />
-      <Screen settings={settings}>
-        {templateNames.map(template => (
-          <Preview
-            key={template}
-            template={template}
+      <Screen settings={settings} size={projectSize}>
+        {sortedTemplates.map((templateName, index) => (
+          <TemplatePreview
+            key={templateName}
+            name={templateName}
             onReady={onTemplateReady}
-            layer={schema[template]?.layer}
-            initialPreset={templateSettings[template]?.preset}
+            layer={schema[templateName]?.layer}
+            initialPreset={templateSettings[templateName]?.preset}
+            preview={templatePreviews[index]}
           />
         ))}
       </Screen>
@@ -127,44 +134,45 @@ const App = () => {
   )
 }
 
-export const Preview = React.memo(({ template, onReady, layer, initialPreset }) => {
-  const iframeRef = useRef()
-  const templateWindow = iframeRef.current?.contentWindow
-  const [state, setState] = usePreviewState({
-    templateWindow,
-    autoPreview: false
-  })
-  const previewData = usePreviewData({
-    templateWindow,
-    state,
-    initialPreset
-  })
+const TemplatePreview = React.memo(
+  ({ name, onReady, layer, initialPreset, preview }) => {
+    console.log(2, preview)
+    const [iframeRef, setIframeRef] = useState()
+    const templateWindow = iframeRef?.contentWindow
+    const [state, setState] = usePreviewState({
+      templateWindow,
+      autoPreview: false
+    })
+    const previewData = usePreviewData({
+      presets: preview.previewData,
+      images: preview.previewImages,
+      initialPreset,
+      templateWindow,
+      state,
+    })
 
-  React.useEffect(() => {
-    if (previewData.previewData !== undefined) {
-      onReady(template, previewData, setState)
-    }
-  }, [template, previewData, onReady])
+    React.useEffect(() => {
+      console.log(1, previewData)
+      if (previewData.previewData !== undefined) {
+        onReady(name, previewData, setState)
+      }
+    }, [name, previewData, onReady])
 
-  const hidden = layer == null || layer === 0
+    const hidden = layer == null || layer === 0
 
-  return (
-    <iframe
-      ref={iframeRef}
-      src={`/${template}.html`}
-      style={{
-        opacity: hidden ? 0 : 1,
-        pointerEvents: hidden ? 'none' : 'initial',
-        zIndex: layer
-      }}
-      onLoad={() => {
-        // HACK: wait for update window.update to be set.
-        setTimeout(() => {
+    return (
+      <iframe
+        ref={setIframeRef}
+        src={`/${name}.html`}
+        onLoad={() => {
           setState(States.loaded)
-        }, 0)
-      }}
-    />
-  )
-})
-
-ReactDOM.render(<App />, document.getElementById('root'))
+        }}
+        style={{
+          opacity: hidden ? 0 : 1,
+          pointerEvents: hidden ? 'none' : 'initial',
+          zIndex: layer
+        }}
+      />
+    )
+  }
+)

@@ -5,7 +5,7 @@ const appName = packageJson.appName || paths.appPath.match(/([^\/]*)\/*$/)[1]
 const { mode = '1080p' } = packageJson['caspar-graphics'] || {}
 const { html } = require('common-tags')
 
-const size = mode.startsWith('720p')
+const projectSize = mode.startsWith('720p')
   ? { width: 1280, height: 720 }
   : { width: 1920, height: 1080 }
 
@@ -64,7 +64,7 @@ const cssReset = `
   }
 `
 
-const createPreviewHtml = templates => {
+const createPreviewHtml = (templateNames, templatePaths) => {
   const previewPath = path.join(paths.ownLib, 'preview')
 
   return html`
@@ -81,23 +81,37 @@ const createPreviewHtml = templates => {
       <body>
         <div id="root"></div>
         <script type="module">
-          window.templates = ${JSON.stringify(templates)}
-          window.size = ${JSON.stringify(size)}
-          window.projectName = '${appName}'
+          import React from 'react'
+          import ReactDOM from 'react-dom'
+          import PreviewApp from '${previewPath}'
+
+          const templatePreviews = await Promise.all(
+            ${JSON.stringify(templatePaths)}.map(async templatePath => {
+              const { previewData, previewImages } = await import(
+                /* @vite-ignore */ templatePath
+              )
+              return { previewData, previewImages }
+            })
+          )
+
+          ReactDOM.render(
+            React.createElement(PreviewApp, {
+              projectName: '${appName}',
+              projectSize: ${JSON.stringify(projectSize)},
+              templateNames: ${JSON.stringify(templateNames)},
+              templatePreviews
+            }),
+            document.getElementById('root')
+          )
         </script>
-        <script type="module" src="${previewPath}"></script>
       </body>
     </html>
   `
 }
 
-const createTemplateHtml = (name, production) => {
+const createTemplateHtml = (name) => {
   const templatePath = path.join(paths.appTemplates, name, 'index.jsx')
-  const createPath = path.join(
-    paths.ownLib,
-    'template',
-    production ? 'create.jsx' : 'create.dev.js'
-  )
+  const templateProviderPath = path.join(paths.ownLib, 'template', 'index.jsx')
 
   return html`
     <!DOCTYPE html>
@@ -112,12 +126,29 @@ const createTemplateHtml = (name, production) => {
       </head>
       <body>
         <div id="root"></div>
-        <script type="module" src="${templatePath}"></script>
-        <script type="module" src="${createPath}"></script>
         <script type="module">
-          import { createTemplate } from '${createPath}'
-          import * as template from '${templatePath}'
-          createTemplate(template)
+          import React from 'react'
+          import ReactDOM from 'react-dom'
+          import { TemplateProvider } from '${templateProviderPath}'
+          const { default: Template, size: templateSize } = await import(
+            '${templatePath}'
+          )
+
+          const size = templateSize || ${JSON.stringify(projectSize)}
+          const html = document.documentElement
+          html.style.height = size?.width ?? 1920 + 'px'
+          html.style.width = size?.height ?? 1080 + 'px'
+
+          ReactDOM.render(
+            React.createElement(
+              TemplateProvider,
+              { name: document.title },
+              typeof Template.prototype?.render === 'function'
+                ? React.createElement(ClassWrapper, { Template })
+                : React.createElement(Template)
+            ),
+            document.getElementById('root')
+          )
         </script>
       </body>
     </html>

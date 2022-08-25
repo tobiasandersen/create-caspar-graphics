@@ -37,6 +37,10 @@ export function usePreviewState({ templateWindow, autoPreview }) {
   // Once the template has animated off, we want to reload it.
   // This is to imitate Caspar's remove method.
   useEffect(() => {
+    if (!templateWindow) {
+      return
+    }
+
     if (state === States.loaded) {
       templateWindow.remove = () => {
         setState(States.loading)

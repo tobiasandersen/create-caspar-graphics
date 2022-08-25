@@ -35,9 +35,16 @@ async function createServer(availablePort) {
   const watcher = watchTemplates()
 
   const buildPreview = () => {
+    const templates = watcher.getTemplates()
+
     fs.writeFile(
       path.join(paths.viteDev, 'index.html'),
-      createPreviewHtml(watcher.getTemplates())
+      createPreviewHtml(
+        templates,
+        templates.map(template =>
+          path.join(paths.appTemplates, template, 'index.jsx')
+        )
+      )
     )
   }
 

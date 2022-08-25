@@ -2,7 +2,7 @@ import React, { useRef } from 'react'
 import { useRect } from '@reach/rect'
 import styles from './screen.module.css'
 
-export const Screen = ({ size = window.size, children, settings }) => {
+export const Screen = ({ size, children, settings }) => {
   const containerRef = useRef()
   const containerRect = useRect(containerRef)
 

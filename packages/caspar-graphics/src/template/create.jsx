@@ -3,8 +3,8 @@ import ReactDOM from 'react-dom'
 import { TemplateProvider } from '.'
 import { ClassWrapper } from './class-wrapper'
 
-export function createTemplate(template) {
-  const { default: Template } = template
+export function createTemplate(module) {
+  const { default: Template } = module
 
   if (!Template) {
     return

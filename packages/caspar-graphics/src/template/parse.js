@@ -1,36 +1,16 @@
-import { Base64 } from 'js-base64'
 import parser from 'fast-xml-parser'
-import queryString from 'querystring'
-
-export function getQueryData() {
-  const { search } = window.location
-  return search
-    ? Object.entries(queryString.parse(search.replace(/^\?/, '')) || {})
-        .map(([key, value]) => ({
-          [key]: value === 'true' ? true : value === 'false' ? false : value
-        }))
-        .reduce((acc, curr) => ({ ...acc, ...curr }), {})
-    : {}
-}
 
 export function parse(str) {
   try {
     const m = str.match(/<templateData>(.*)<\/templateData>/) || []
-
-    if (m.length < 2) {
-      return JSON.parse(str)
-    }
-
-    let str2 = m[1]
-    str2 = Base64.decode(str2)
-    return JSON.parse(str2)
+    return JSON.parse(m.length < 2 ? str : window.atob.decode(m[1]))
   } catch (err) {
     console.log('parse failed' + err.message)
-    return normalize(parseXML2(str))
+    return parseXML(str)
   }
 }
 
-function parseXML2(xml) {
+function parseXML(xml) {
   const params = parser.parse(xml)
   const result = {}
 
@@ -51,7 +31,7 @@ function parseXML2(xml) {
     result[val.$.id] = componentData
   }
 
-  return result
+  return normalize(result)
 }
 
 function normalize(data) {

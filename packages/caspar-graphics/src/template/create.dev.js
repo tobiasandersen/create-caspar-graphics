@@ -1,7 +1,7 @@
 import { createTemplate as create } from './create'
 
-export function createTemplate(template) {
-  const { default: Template, previewData, previewImages } = template
+export function createTemplate(module, previewData, previewImages) {
+  const { default: Template } = module
 
   if (!Template) {
     return
@@ -27,5 +27,5 @@ export function createTemplate(template) {
     }
   }
 
-  create(template)
+  create(module)
 }
