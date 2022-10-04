@@ -1,5 +1,5 @@
 import ReactDOM from 'react-dom'
-import React, { useState } from 'react'
+import React, { useState, useReducer, useRef, useEffect } from 'react'
 import { States } from '../../'
 import { Screen } from './screen'
 import { usePersistentValue } from './use-persistent-value'
@@ -7,7 +7,52 @@ import { usePreviewState } from './use-preview-state'
 import { usePreviewData } from './use-preview-data'
 import { FaRegSadCry } from 'react-icons/fa'
 import { Leva } from './leva'
+import { Sidebar } from './sidebar'
 import styles from './index.module.css'
+import './global.css'
+
+function reducer(state, action) {
+  console.log(action)
+
+  if (!action.template) {
+    return state
+  }
+
+  const updateTemplate = data => {
+    const index = state.templates.findIndex(
+      template => template.name === action.template
+    )
+
+    if (index === -1) {
+      return state
+    }
+
+    const templates = [...state.templates]
+    templates[index] = { ...templates[index], ...data }
+    return { ...state, templates }
+  }
+
+  switch (action.type) {
+    case 'show':
+      return updateTemplate({ show: true })
+    case 'hide':
+      return updateTemplate({ show: false })
+    case 'data-change':
+      return updateTemplate({ data: action.data })
+    case 'removed':
+      return updateTemplate({ state: States.loading })
+    case 'caspar-update':
+      return updateTemplate({ data: action.data })
+    case 'caspar-state':
+      return updateTemplate({ actualState: action.state })
+    default:
+      return state
+  }
+}
+
+function getInferredSchema(data) {
+  return Object.fromEntries(Object.entries(data || {}).map(([key, value]) => [key, Array.isArray(value) ? 'array' : typeof value]))
+}
 
 export default function PreviewApp({
   templateNames,
@@ -15,7 +60,21 @@ export default function PreviewApp({
   projectName,
   projectSize
 }) {
-  const [templates, setTemplates] = React.useState({})
+  const templates = [...templateNames]
+    .map((name, index) => {
+      const { previewData, schema } = templatePreviews[index] || {}
+      return {
+        name,
+        schema: schema || getInferredSchema(previewData),
+        previewData,
+        data: previewData,
+        show: true,
+        actualState: States.loading,
+        layer: index,
+      }
+    })
+    .sort((a, b) => a.localeCompare(b))
+  const [state, dispatch] = useReducer(reducer, { templates })
   const [templateSettings, setTemplateSettings] = usePersistentValue(
     `cg.${projectName}.templates`,
     {}
@@ -39,94 +98,15 @@ export default function PreviewApp({
     )
   }
 
-  const sortedTemplates = [...templateNames].sort((a, b) => {
-    if (a < b) {
-      return -1
-    } else if (b < a) {
-      return 1
-    } else {
-      return 0
-    }
-  })
-
-  const schema = {}
-
-  for (let i = 0; i < sortedTemplates.length; i++) {
-    const key = sortedTemplates[i]
-    const previewData = templatePreviews[i]
-    const template = templates[key]
-    const state = templateSettings[key] || {}
-
-    if (!template) {
-      continue
-    }
-
-    schema[key] = {
-      layer: state.layer ?? i + 1,
-      preset: state.preset || '',
-      collapsed: state.collapsed ?? false,
-      previewData,
-      previewImages: template.data.images,
-      data: template.data.data,
-      play: () => {
-        template.setState(States.playing)
-      },
-      stop: () => {
-        template.setState(States.stopped)
-      },
-      update: data => {
-        template.data.update(data)
-      },
-      set: (dataKey, value) => {
-        setTemplateSettings(current => ({
-          ...current,
-          [key]: { ...current[key], [dataKey]: value }
-        }))
-      }
-    }
-  }
-
-  const onTemplateReady = React.useCallback((template, data, setState) => {
-    setTemplates(value => ({ ...value, [template]: { data, setState } }))
-  }, [])
-
-  const isReady = sortedTemplates.every(template => schema[template] != null)
-
   return (
     <div className={styles.container}>
-      <Leva
-        schema={isReady ? schema : null}
-        settings={settings}
-        onSettingChange={(key, value) => {
-          setSettings(settings => ({ ...settings, [key]: value }))
-        }}
-        playAll={() => {
-          for (const template of Object.values(schema)) {
-            if (template.layer > 0) {
-              template.play()
-            }
-          }
-        }}
-        stopAll={() => {
-          for (const template of Object.values(schema)) {
-            if (template.layer > 0) {
-              template.stop()
-            }
-          }
-        }}
-        updateAll={data => {
-          console.log('updateAll', data)
-        }}
-      />
+      <Sidebar state={state} dispatch={dispatch} />
       <Screen settings={settings} size={projectSize}>
-        {sortedTemplates.map((templateName, index) => (
+        {state.templates.map(template => (
           <TemplatePreview
-            key={templateName}
-            name={templateName}
-            onReady={onTemplateReady}
-            layer={schema[templateName]?.layer}
-            initialPreset={templateSettings[templateName]?.preset}
-            preview={templatePreviews[index]}
+            key={template.name}
+            dispatch={dispatch}
+            {...template}
           />
         ))}
       </Screen>
@@ -134,45 +114,65 @@ export default function PreviewApp({
   )
 }
 
-const TemplatePreview = React.memo(
-  ({ name, onReady, layer, initialPreset, preview }) => {
-    console.log(2, preview)
-    const [iframeRef, setIframeRef] = useState()
-    const templateWindow = iframeRef?.contentWindow
-    const [state, setState] = usePreviewState({
-      templateWindow,
-      autoPreview: false
-    })
-    const previewData = usePreviewData({
-      presets: preview.previewData,
-      images: preview.previewImages,
-      initialPreset,
-      templateWindow,
-      state,
-    })
+const TemplatePreview = ({
+  name,
+  show,
+  dispatch,
+  layer,
+  previewData,
+  ...props
+}) => {
+  const [templateWindow, setTemplateWindow] = useState()
 
-    React.useEffect(() => {
-      console.log(1, previewData)
-      if (previewData.previewData !== undefined) {
-        onReady(name, previewData, setState)
-      }
-    }, [name, previewData, onReady])
+  // Data Updates
+  useEffect(() => {
+    if (!templateWindow) {
+      return
+    }
 
-    const hidden = layer == null || layer === 0
+    // TODO: in nxt we often start by sending an empty object.
+    // Could we have a mode (setting?) to do the same here?
+    templateWindow.update(previewData || {})
+    dispatch({ type: 'caspar-update', template: name, data: previewData })
+  }, [templateWindow, previewData])
 
-    return (
-      <iframe
-        ref={setIframeRef}
-        src={`/${name}.html`}
-        onLoad={() => {
-          setState(States.loaded)
-        }}
-        style={{
-          opacity: hidden ? 0 : 1,
-          pointerEvents: hidden ? 'none' : 'initial',
-          zIndex: layer
-        }}
-      />
-    )
-  }
-)
+  // State Updates
+  useEffect(() => {
+    if (!templateWindow) {
+      return
+    }
+
+    if (show) {
+      templateWindow.play()
+    } else {
+      templateWindow.stop()
+    }
+  }, [templateWindow, show])
+
+  return (
+    <iframe
+      src={`/${name}.html`}
+      style={{ pointerEvents: show ? 'initial' : 'none' }}
+      onLoad={evt => {
+        const { contentWindow } = evt.target
+
+        contentWindow.onReady = () => {
+          setTemplateWindow(contentWindow)
+          dispatch({
+            type: 'caspar-state',
+            template: name,
+            state: States.loaded
+          })
+        }
+
+        // Once the template has animated off, we want to reload it.
+        // This is to imitate Caspar's remove method.
+        contentWindow.remove = () => {
+          contentWindow.location.reload()
+          setTemplateWindow(null)
+          dispatch({ type: 'removed', template: name })
+        }
+      }}
+    />
+  )
+}

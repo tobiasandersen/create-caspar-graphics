@@ -4,9 +4,8 @@ import { motion } from 'framer-motion'
 
 const FramerMotion = () => {
   const { state, data, safeToRemove } = useCaspar()
-  const { text } = data
+  const { text, number, showNumber } = data
   const isVisible = text && state === States.playing
-  console.log(1, { text, isVisible })
 
   return (
     <motion.div
@@ -18,6 +17,7 @@ const FramerMotion = () => {
         }
       }}
       style={{
+        fontFamily: 'sans-serif',
         display: 'flex',
         alignItems: 'center',
         paddingLeft: 20,
@@ -33,11 +33,21 @@ const FramerMotion = () => {
         borderRadius: 4
       }}
     >
-      {text}
+      {showNumber ? number ?? 0 : null}: {text}
     </motion.div>
   )
 }
 
-export const previewData = { text: 'FramerMotion Text' }
+export const schema = {
+  text: "string",
+  number: "number",
+  showNumber: "boolean"
+}
+
+export const previewData = {
+  text: 'FramerMotion Text',
+  number: 5,
+  showNumber: true
+}
 
 export default FramerMotion

@@ -1,0 +1,35 @@
+.container {
+  display: flex;
+  gap: 15px;
+}
+
+.checkbox {
+  all: unset;
+  background-color: white;
+  width: 25px;
+  height: 25px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 10px var(--neutral8);
+}
+
+.checkbox[data-checked] {
+  
+}
+  
+.checkbox:hover { 
+  background-color: var(--neutral5);
+}
+
+.checkbox:focus { 
+  box-shadow: 0 0 0 2px black;
+}
+
+.label {
+  color: var(--neutral12);
+  font-size: 14px;
+  line-height: 1;
+  user-select: none;
+}

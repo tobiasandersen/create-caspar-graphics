@@ -1,0 +1,58 @@
+@import '@radix-ui/colors/indigoDark.css';
+@import '@radix-ui/colors/indigoDarkA.css';
+@import '@radix-ui/colors/slateDark.css';
+@import '@radix-ui/colors/green.css';
+@import '@radix-ui/colors/redDark.css';
+
+:root {
+  --space-0: 2px;
+  --space-1: 4px;
+  --space-2: 6px;
+  --space-3: 8px;
+  --space-4: 10px;
+  --space-5: 12px;
+  --space-6: 16px;
+  --space-7: 20px;
+  --space-ui: 20px;
+}
+
+.dark-theme {
+  --neutral1: var(--slate1);
+  --neutral2: var(--slate2);
+  --neutral3: var(--slate3);
+  --neutral4: var(--slate4);
+  --neutral5: var(--slate5);
+  --neutral6: var(--slate6);
+  --neutral7: var(--slate7);
+  --neutral8: var(--slate8);
+  --neutral9: var(--slate9);
+  --neutral10: var(--slate10);
+  --neutral11: var(--slate11);
+  --neutral12: var(--slate12);
+
+  --primary1: var(--indigo1);
+  --primary2: var(--indigo2);
+  --primary3: var(--indigo3);
+  --primary4: var(--indigo4);
+  --primary5: var(--indigo5);
+  --primary6: var(--indigo6);
+  --primary7: var(--indigo7);
+  --primary8: var(--indigo8);
+  --primary9: var(--indigo9);
+  --primary10: var(--indigo10);
+  --primary11: var(--indigo11);
+  --primary12: var(--indigo12);
+
+  --primaryA1: var(--indigoA1);
+  --primaryA2: var(--indigoA2);
+  --primaryA3: var(--indigoA3);
+  --primaryA4: var(--indigoA4);
+  --primaryA5: var(--indigoA5);
+  --primaryA6: var(--indigoA6);
+  --primaryA7: var(--indigoA7);
+  --primaryA8: var(--indigoA8);
+  --primaryA9: var(--indigoA9);
+  --primaryA10: var(--indigoA10);
+  --primaryA11: var(--indigoA11);
+  --primaryA12: var(--indigoA12);
+}

@@ -10,7 +10,9 @@ function watchTemplates() {
 
   watcher.getTemplates = () => {
     return Object.entries(watcher.getWatched())
-      .filter(([, files]) => files.some(filename => filename === 'index.jsx'))
+      .filter(([, files]) =>
+        files.some(filename => filename.startsWith('index'))
+      )
       .map(([dir]) => path.basename(dir))
   }
 

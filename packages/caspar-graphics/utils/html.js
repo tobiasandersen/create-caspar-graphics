@@ -78,7 +78,7 @@ const createPreviewHtml = (templateNames, templatePaths) => {
         </style>
         <title>${appName}</title>
       </head>
-      <body>
+      <body class="dark-theme">
         <div id="root"></div>
         <script type="module">
           import React from 'react'
@@ -87,10 +87,10 @@ const createPreviewHtml = (templateNames, templatePaths) => {
 
           const templatePreviews = await Promise.all(
             ${JSON.stringify(templatePaths)}.map(async templatePath => {
-              const { previewData, previewImages } = await import(
+              const { previewData, previewImages, schema } = await import(
                 /* @vite-ignore */ templatePath
               )
-              return { previewData, previewImages }
+              return { previewData, previewImages, schema }
             })
           )
 
@@ -109,9 +109,9 @@ const createPreviewHtml = (templateNames, templatePaths) => {
   `
 }
 
-const createTemplateHtml = (name) => {
-  const templatePath = path.join(paths.appTemplates, name, 'index.jsx')
-  const templateProviderPath = path.join(paths.ownLib, 'template', 'index.jsx')
+const createTemplateHtml = name => {
+  const templatePath = path.join(paths.appTemplates, name)
+  const templateProviderPath = path.join(paths.ownLib, 'template')
 
   return html`
     <!DOCTYPE html>

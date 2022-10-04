@@ -13,7 +13,7 @@ export const TemplateProvider = ({ children, name }) => {
     rest && rest.length && console.log(rest)
   }
 
-  // Handle state updates
+  // Handle state and data updates
   useEffect(() => {
     window.load = () => {
       setState(States.loaded)
@@ -35,16 +35,6 @@ export const TemplateProvider = ({ children, name }) => {
       logger('.stop()')
     }
 
-    return () => {
-      delete window.load
-      delete window.play
-      delete window.pause
-      delete window.stop
-    }
-  }, [])
-
-  // Handle data updates
-  useEffect(() => {
     window.update = data => {
       try {
         data = typeof data === 'string' ? parse(data) : data
@@ -59,7 +49,14 @@ export const TemplateProvider = ({ children, name }) => {
       }
     }
 
+    // Let the preview app know that we're all set up.
+    window.onReady?.(window)
+
     return () => {
+      delete window.load
+      delete window.play
+      delete window.pause
+      delete window.stop
       delete window.update
     }
   }, [])

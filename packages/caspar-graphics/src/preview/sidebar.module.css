@@ -1,0 +1,35 @@
+.sidebar {
+  background: var(--neutral2);
+  box-shadow: 0 0 20px -10px #00000088;
+  padding: var(--space-ui);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  margin-left: -6px;
+}
+
+.trigger {
+  all: unset;
+  color: #fafafa;
+  font-weight: 500;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.template[data-state="open"] .trigger > svg {
+  transform: rotate(90deg);
+  transition: 0.2s ease transform;
+}
+
+.data {
+  padding: 10px 0 10px 16px;
+  box-sizing: border-box;
+  border-left: 1px solid var(--neutral6);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}

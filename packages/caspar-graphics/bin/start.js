@@ -41,9 +41,7 @@ async function createServer(availablePort) {
       path.join(paths.viteDev, 'index.html'),
       createPreviewHtml(
         templates,
-        templates.map(template =>
-          path.join(paths.appTemplates, template, 'index.jsx')
-        )
+        templates.map(template => path.join(paths.appTemplates, template))
       )
     )
   }
