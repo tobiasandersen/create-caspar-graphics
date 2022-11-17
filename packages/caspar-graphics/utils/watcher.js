@@ -3,7 +3,7 @@ const path = require('path')
 const paths = require('../config/paths')
 
 function watchTemplates() {
-  const watcher = chokidar.watch(paths.appTemplates + '/*/index.jsx', {
+  const watcher = chokidar.watch(paths.appPath + '**/*.html', {
     depth: 1,
     ignored: /(^|[\/\\])\../ // ignore dotfiles
   })

@@ -1,8 +1,5 @@
-import React from 'react'
-import { createRoot } from 'react-dom/client'
-import { TemplateProvider, TemplateContext, States } from './template'
-
-export { States }
+import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react'
+import { TemplateContext, States } from './template'
 
 export const useCaspar = () => {
   const { state, ...context } = React.useContext(TemplateContext)
@@ -29,5 +26,3 @@ export const useCasparData = () => {
 export const useDelayPlay = () => {
   return React.useContext(TemplateContext).delayPlay
 }
-
-export * from './template/animate'

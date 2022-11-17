@@ -4,13 +4,12 @@
   height: 100%;
   box-sizing: border-box;
   overflow: hidden;
-  -webkit-font-smoothing: antialiased;
-  font-family: sans-serif;
   position: relative;
   display: grid;
   grid-auto-flow: column;
   grid-template-columns: 300px 1fr;
   align-items: stretch;
+  z-index: 0;
 }
 
 .screen {

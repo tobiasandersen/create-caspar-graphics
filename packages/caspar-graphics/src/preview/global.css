@@ -1,8 +1,23 @@
+@import '@radix-ui/colors/indigo.css';
 @import '@radix-ui/colors/indigoDark.css';
-@import '@radix-ui/colors/indigoDarkA.css';
+@import '@radix-ui/colors/slate.css';
 @import '@radix-ui/colors/slateDark.css';
-@import '@radix-ui/colors/green.css';
+@import '@radix-ui/colors/red.css';
 @import '@radix-ui/colors/redDark.css';
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
 
 :root {
   --space-0: 2px;
@@ -14,8 +29,17 @@
   --space-6: 16px;
   --space-7: 20px;
   --space-ui: 20px;
+
+  --shadow: 0px 0px 16px -1px rgba(0, 0, 0, 0.05), 0px 0px 16px -8px rgba(0, 0, 0, 0.05), 0px 0px 16px -12px rgba(0, 0, 0, 0.12), 0px 0px 2px 0px rgba(0, 0, 0, 0.08);
+  --shadow-inset: inset 0 0 4px 2px rgb(0 0 0 / 5%);
 }
 
+.dark-theme {
+  --shadow: 0px 0px 16px -1px rgba(0, 0, 0, 0.5), 0px 0px 16px -8px rgba(0, 0, 0, 0.5), 0px 0px 16px -12px rgba(0, 0, 0, 0.72), 0px 0px 2px 0px rgba(0, 0, 0, 0.8);
+  --shadow-inset: inset 0 0 4px 3px rgb(0 0 0 / 70%);
+}
+
+:root,
 .dark-theme {
   --neutral1: var(--slate1);
   --neutral2: var(--slate2);
@@ -42,17 +66,4 @@
   --primary10: var(--indigo10);
   --primary11: var(--indigo11);
   --primary12: var(--indigo12);
-
-  --primaryA1: var(--indigoA1);
-  --primaryA2: var(--indigoA2);
-  --primaryA3: var(--indigoA3);
-  --primaryA4: var(--indigoA4);
-  --primaryA5: var(--indigoA5);
-  --primaryA6: var(--indigoA6);
-  --primaryA7: var(--indigoA7);
-  --primaryA8: var(--indigoA8);
-  --primaryA9: var(--indigoA9);
-  --primaryA10: var(--indigoA10);
-  --primaryA11: var(--indigoA11);
-  --primaryA12: var(--indigoA12);
 }

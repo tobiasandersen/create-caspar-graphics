@@ -2,7 +2,7 @@ import React, { useRef } from 'react'
 import { useRect } from '@reach/rect'
 import styles from './screen.module.css'
 
-export const Screen = ({ size, children, settings }) => {
+export const Screen = ({ size, children, settings, image }) => {
   const containerRef = useRef()
   const containerRect = useRect(containerRef)
 
@@ -21,9 +21,9 @@ export const Screen = ({ size, children, settings }) => {
         {children}
         {settings.image ? (
           <img
-            src={settings.image}
+            src={settings.image.url}
             className={styles.image}
-            style={{ opacity: settings.imageOpacity ?? 0 }}
+            style={{ opacity: settings.image.opacity ?? 0.3 }}
           />
         ) : null}
       </div>

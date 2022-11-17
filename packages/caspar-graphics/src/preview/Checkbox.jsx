@@ -16,9 +16,12 @@ export const Checkbox = ({ value, onChange, label, id }) => {
           <MdCheck />
         </Primitive.Indicator>
       </Primitive.Root>
+      {label != null && (
+
       <label htmlFor={id} className={styles.label}>
         {label}
       </label>
+      )}
     </div>
   )
 }

@@ -1,8 +1,30 @@
 import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react'
-import { parse } from './parse'
-import { AnimateProvider } from './animate'
+import { createRoot } from 'react-dom/client'
+import { parse } from '../utils/parse'
 
 export const TemplateContext = React.createContext()
+
+let root
+
+export const render = (Template, options = {}) => {
+  let { container = document.getElementById('root') } = options
+
+  if (!container) {
+    container = document.createElement('div')
+    container.id = 'root'
+    document.body.appendChild(container)
+  }
+
+  document.head.insertAdjacentHTML('beforeend', `<meta name="viewport" content="width=device-width, initial-scale=1.0" />`)
+
+  if (!root)  {
+    root = createRoot(container)
+  }
+
+  root.render(
+    React.createElement(TemplateProvider, {}, React.createElement(Template))
+  )
+}
 
 export const TemplateProvider = ({ children, name }) => {
   const [state, setState] = useState(States.loading)
@@ -79,10 +101,8 @@ export const TemplateProvider = ({ children, name }) => {
   const delayPlay = useCallback(() => {
     const id = idRef.current++
     setDelays(delays => [...delays, id])
-    console.log('add delay', id)
 
     return () => {
-      console.log('dispose delay', id)
       setDelays(delays => delays.filter(delay => delay !== id))
     }
   }, [])
@@ -97,17 +117,17 @@ export const TemplateProvider = ({ children, name }) => {
         state,
         name,
         safeToRemove,
-        delayPlay,
+        delayPlay
       }}
     >
-      <AnimateProvider>
-        {state !== States.removed ? <Template>{children}</Template> : null}
-      </AnimateProvider>
+      {state !== States.removed ? (
+        <TemplateWrapper>{children}</TemplateWrapper>
+      ) : null}
     </TemplateContext.Provider>
   )
 }
 
-const Template = React.memo(({ children }) => children)
+const TemplateWrapper = React.memo(({ children }) => children)
 
 export const States = {
   loading: 'LOADING',

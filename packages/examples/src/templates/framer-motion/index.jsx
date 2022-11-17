@@ -45,9 +45,16 @@ export const schema = {
 }
 
 export const previewData = {
-  text: 'FramerMotion Text',
-  number: 5,
-  showNumber: true
+  Default: {
+    text: 'FramerMotion Text',
+    number: 5,
+    showNumber: true
+  },
+  'Another Text': {
+    text: 'FramerMotion With Another Text',
+    number: 10,
+    showNumber: false
+  }
 }
 
 export default FramerMotion

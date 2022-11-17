@@ -73,9 +73,6 @@ const createPreviewHtml = (templateNames, templatePaths) => {
       <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <style>
-          ${cssReset}
-        </style>
         <title>${appName}</title>
       </head>
       <body class="dark-theme">
@@ -127,28 +124,31 @@ const createTemplateHtml = name => {
       <body>
         <div id="root"></div>
         <script type="module">
-          import React from 'react'
-          import ReactDOM from 'react-dom'
+          // import React from "react"
+          // import ReactDOM from "react-dom"
           import { TemplateProvider } from '${templateProviderPath}'
           const { default: Template, size: templateSize } = await import(
             '${templatePath}'
           )
 
-          const size = templateSize || ${JSON.stringify(projectSize)}
-          const html = document.documentElement
-          html.style.height = size?.width ?? 1920 + 'px'
-          html.style.width = size?.height ?? 1080 + 'px'
+          console.log('hello')
+          console.log(TemplateProvider, Template)
 
-          ReactDOM.render(
-            React.createElement(
-              TemplateProvider,
-              { name: document.title },
-              typeof Template.prototype?.render === 'function'
-                ? React.createElement(ClassWrapper, { Template })
-                : React.createElement(Template)
-            ),
-            document.getElementById('root')
-          )
+          // const size = templateSize || ${JSON.stringify(projectSize)}
+          // const html = document.documentElement
+          // html.style.height = size?.width ?? 1920 + 'px'
+          // html.style.width = size?.height ?? 1080 + 'px'
+          //
+          // ReactDOM.render(
+          //   React.createElement(
+          //     TemplateProvider,
+          //     { name: document.title },
+          //     typeof Template.prototype?.render === 'function'
+          //       ? React.createElement(ClassWrapper, { Template })
+          //       : React.createElement(Template)
+          //   ),
+          //   document.getElementById('root')
+          // )
         </script>
       </body>
     </html>

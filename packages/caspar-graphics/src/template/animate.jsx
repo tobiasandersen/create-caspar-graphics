@@ -182,8 +182,6 @@ export const useAnimation = () => {
   const animateRef = useRef()
   const casparState = useCasparState()
 
-  console.log({ animate })
-
   let animationState = AnimationStates.hidden
 
   if (casparState === States.stopped) {
