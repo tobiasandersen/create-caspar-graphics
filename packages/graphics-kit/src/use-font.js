@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect, useLayoutEffect } from 'react'
 import FontFaceObserver from 'fontfaceobserver'
-import { useDelayPlay } from './use-caspar'
+import { useDelayPlay } from './TemplateProvider'
 
 export const useFontObserver = (...args) => {
   const [loaded, setLoaded] = React.useState(false)
@@ -55,7 +55,7 @@ export function useFont({ src, weight, style }) {
     async function loadFonts() {
       const name = fonts[0].path
         ?.split('/')
-        ?.at(-1)
+        ?.slice(-1)[0]
         ?.split('.')[0]
       const fontFaces = await Promise.all(
         fonts.map(font => {
@@ -77,6 +77,6 @@ export function useFont({ src, weight, style }) {
   }, [key, weight, style])
 
   return {
-    style: { fontFamily: font }
+    style: { fontFamily: font, visibility: font ? 'visible' : 'hidden' }
   }
 }

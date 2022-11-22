@@ -1,20 +1,20 @@
-import React, { useRef } from 'react'
-import { useRect } from '@reach/rect'
+import React, { useState } from 'react'
+import { useSize } from '@radix-ui/react-use-size'
 import styles from './screen.module.css'
 
 export const Screen = ({ size, children, settings, image }) => {
-  const containerRef = useRef()
-  const containerRect = useRect(containerRef)
+  const [ref, setRef] = useState()
+  const containerSize = useSize(ref)
 
   return (
-    <div ref={containerRef} className={styles.container}>
+    <div ref={setRef} className={styles.container}>
       <div
         className={styles.screen}
         style={{
           background: settings.background,
           width: size?.width || 0,
           height: size?.height || 0,
-          transform: `scale(${calcScale(containerRect, size)})
+          transform: `scale(${calcScale(containerSize, size)})
           translate(-50%, -50%)`
         }}
       >

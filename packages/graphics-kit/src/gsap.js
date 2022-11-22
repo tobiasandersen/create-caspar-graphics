@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useLayoutEffect } from 'react'
 import { gsap } from 'gsap'
-import { useCasparState, States, useAnimate } from 'caspar-graphics'
+import { useCasparState, States, useAnimate } from './TemplateProvider'
 
 // TODO: Check if this can be added back. Currently it has problems with
 // timeline.from() animations flickering before actually disappearing.

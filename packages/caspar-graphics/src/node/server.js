@@ -1,17 +1,27 @@
-#!/usr/bin/env node
+// #!/usr/bin/env node
 
 import fs from 'fs'
 import path from 'path'
 import chokidar from 'chokidar'
 import react from '@vitejs/plugin-react'
 import getPort from 'get-port'
-import { createServer } from 'vite'
-import chalk from 'chalk'
-import paths from '../config/paths'
+import { createServer as createViteServer } from 'vite'
+import paths from '../../config/paths.js'
+
+const watcher = chokidar.watch(
+  paths.appTemplates + '/**/(index.html|manifest.json)',
+  {
+    depth: 1,
+    awaitWriteFinish: {
+      stabilityThreshold: 300,
+      pollInterval: 100
+    }
+  }
+)
 
 export async function createServer({ host }) {
   const templatesPort = await getPort({ port: 5173 })
-  const templatesServer = await createServer({
+  const templatesServer = await createViteServer({
     root: paths.appTemplates,
     clearScreen: false,
     base: '/templates/',
@@ -26,7 +36,7 @@ export async function createServer({ host }) {
     },
     plugins: [react()]
   })
-  const previewServer = await createServer({
+  const previewServer = await createViteServer({
     root: paths.ownPath,
     clearScreen: false,
     server: {
@@ -43,17 +53,6 @@ export async function createServer({ host }) {
 
   const pkg = JSON.parse(fs.readFileSync(paths.appPackageJson))
 
-  const watcher = chokidar.watch(
-    paths.appTemplates + '/**/(index.html|manifest.json)',
-    {
-      depth: 1,
-      awaitWriteFinish: {
-        stabilityThreshold: 300,
-        pollInterval: 100
-      }
-    }
-  )
-
   previewServer.ws.on('cg:preview-ready', (data, client) => {
     client.send('cg:update', {
       projectName: pkg.name,
@@ -69,7 +68,7 @@ export async function createServer({ host }) {
     listen: async () => {
       return Promise.all([templatesServer.listen(), previewServer.listen()])
     },
-    printUrls: previewServer.printUrl
+    printUrls: previewServer.printUrls
   }
 }
 

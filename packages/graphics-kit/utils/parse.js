@@ -3,7 +3,7 @@ import parser from 'fast-xml-parser'
 export function parse(str) {
   try {
     const m = str.match(/<templateData>(.*)<\/templateData>/) || []
-    return JSON.parse(m.length < 2 ? str : window.atob.decode(m[1]))
+    return JSON.parse(m.length < 2 ? str : window.atob(m[1]))
   } catch (err) {
     console.log('parse failed' + err.message)
     return parseXML(str)

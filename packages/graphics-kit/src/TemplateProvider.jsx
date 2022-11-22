@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react'
-import { createRoot } from 'react-dom/client'
+import * as ReactDOM from 'react-dom/client';
 import { parse } from '../utils/parse'
+import { usePrevious } from './use-previous'
 
 export const TemplateContext = React.createContext()
 
@@ -18,7 +19,7 @@ export const render = (Template, options = {}) => {
   document.head.insertAdjacentHTML('beforeend', `<meta name="viewport" content="width=device-width, initial-scale=1.0" />`)
 
   if (!root)  {
-    root = createRoot(container)
+    root = ReactDOM.createRoot(container)
   }
 
   root.render(
@@ -30,6 +31,7 @@ export const TemplateProvider = ({ children, name }) => {
   const [state, setState] = useState(States.loading)
   const [data, setData] = useState()
   const [delays, setDelays] = useState([])
+  const prevState = usePrevious(state)
 
   const logger = (message, ...rest) => {
     console.log(`${name || 'caspar'}${message}`)
@@ -114,7 +116,7 @@ export const TemplateProvider = ({ children, name }) => {
     <TemplateContext.Provider
       value={{
         data: memoizedData,
-        state,
+        state: delays.length > 0 && state === States.playing ? prevState : state,
         name,
         safeToRemove,
         delayPlay
@@ -130,10 +132,36 @@ export const TemplateProvider = ({ children, name }) => {
 const TemplateWrapper = React.memo(({ children }) => children)
 
 export const States = {
-  loading: 'LOADING',
-  loaded: 'LOADED',
-  playing: 'PLAYING',
-  paused: 'PAUSED',
-  stopped: 'STOPPED',
-  removed: 'REMOVED'
+  loading: 0,
+  loaded: 1,
+  playing: 2,
+  paused: 3,
+  stopped: 4,
+  removed: 5
+}
+
+export const useCaspar = () => {
+  const { state, ...context } = React.useContext(TemplateContext)
+
+  return {
+    ...context,
+    state,
+    isLoading: state === States.loading,
+    isLoaded: state === States.loaded,
+    isPlaying: state === States.playing,
+    isPaused: state === States.paused,
+    isStopped: state === States.stopped
+  }
+}
+
+export const useCasparState = () => {
+  return React.useContext(TemplateContext).state
+}
+
+export const useCasparData = () => {
+  return React.useContext(TemplateContext).data
+}
+
+export const useDelayPlay = () => {
+  return React.useContext(TemplateContext).delayPlay
 }

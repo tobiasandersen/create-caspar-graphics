@@ -23,11 +23,10 @@ export function JsonEditor({ value, onChange }) {
         height={20 + stringified.split('\n').length * 18}
         language="json"
         theme="custom"
-        value={stringified}
+        defaultValue={stringified}
         onChange={value => {
            try {
             const parsed = JSON5.parse(value)
-            console.log({ parsed })
             onChange(parsed)
           } catch (err) {
             console.error(err)

@@ -14,7 +14,7 @@ import {
 } from './Menu'
 
 export const TemplateSettings = ({ value, onChange }) => {
-  const { autoPreview, showJson } = value
+  const { autoPlay, showJson } = value
 
   return (
     <div className={styles.container}>
@@ -22,14 +22,14 @@ export const TemplateSettings = ({ value, onChange }) => {
         <MdMenu />
       </button>
       <div className={styles.control}>
-        <label htmlFor="autoPreview">Autoplay</label>
+        <label htmlFor="autoPlay">Autoplay</label>
         <Switch
           labels={false}
-          id="autoPreview"
+          id="autoPlay"
           className={styles.switch}
-          checked={Boolean(autoPreview)}
-          onChange={autoPreview => {
-            onChange(value => ({ ...value, autoPreview }))
+          checked={Boolean(autoPlay)}
+          onChange={autoPlay => {
+            onChange(value => ({ ...value, autoPlay }))
           }}
         />
       </div>

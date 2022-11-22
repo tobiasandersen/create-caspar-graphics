@@ -5,18 +5,22 @@ import React, {
   useEffect,
   useLayoutEffect
 } from 'react'
+import { createRoot } from 'react-dom/client'
 import isPlainObject from 'lodash/isPlainObject'
-import { States } from '../../'
-import { Screen } from './screen'
-import { usePersistentValue } from './use-persistent-value'
-import { usePreviewState } from './use-preview-state'
-import { usePreviewData } from './use-preview-data'
-import { FaRegSadCry } from 'react-icons/fa'
+import { Screen } from './Screen'
 import { Sidebar } from './Sidebar'
+import { usePersistentValue } from './use-persistent-value'
 import styles from './index.module.css'
 import './global.css'
 
-export default function App() {
+const States = {
+  loading: 0,
+  loaded: 1,
+  playing: 2,
+  stopped: 3
+}
+
+function App() {
   const [data, setData] = useState()
 
   useEffect(() => {
@@ -38,11 +42,7 @@ export default function App() {
   if (!data.templates?.length) {
     return (
       <div className={styles.empty}>
-        <FaRegSadCry />
         <div>No templates found</div>
-        <div>
-          Make sure you use <span>.jsx</span> for your React files.
-        </div>
       </div>
     )
   }
@@ -51,7 +51,8 @@ export default function App() {
 }
 
 function reducer(state, action) {
-  console.log(action)
+  // console.log(action)
+
   if (!action.template) {
     console.warn('The action you just dispatched is missing template:', action)
     return state
@@ -75,7 +76,10 @@ function reducer(state, action) {
 
   switch (action.type) {
     case 'toggle-enabled':
-      return updateTemplate({ enabled: !template.enabled, show: template.enabled ? false : template.show })
+      return updateTemplate({
+        enabled: !template.enabled,
+        show: template.enabled ? false : template.show
+      })
     case 'toggle-open':
       return updateTemplate({ open: !template.open })
     case 'show':
@@ -149,7 +153,7 @@ function getInitialState(templates, snapshot) {
           enabled: templateSnapshot?.enabled ?? true,
           open: Boolean(templateSnapshot?.open),
           data: templateSnapshot?.data || presets?.[0]?.[1],
-          show: templateSnapshot?.show ?? true,
+          show: Boolean(snapshot.autoPlay),
           tab: templateSnapshot?.tab,
           state: States.loading,
           layer: index
@@ -168,7 +172,7 @@ function Preview({
   const [persistedState, setPersistetState] = usePersistentValue(
     `cg.${projectName}`,
     {
-      autoPreview: false,
+      autoPlay: false,
       background: '#21ECAF',
       imageOpacity: 0.5,
       colorScheme: 'system'
@@ -180,8 +184,15 @@ function Preview({
   useEffect(() => {
     const templates = {}
 
-    for (const { name, enabled, open, show, data, preset, tab } of state?.templates) {
-      templates[name] = { enabled, open, show, data, preset, tab }
+    for (const {
+      name,
+      enabled,
+      open,
+      data,
+      preset,
+      tab
+    } of state?.templates) {
+      templates[name] = { enabled, open, data, preset, tab }
     }
 
     setPersistetState(persisted => ({ ...persisted, templates }))
@@ -212,6 +223,11 @@ function Preview({
 
 const TemplatePreview = ({ name, show, dispatch, layer, data, ...props }) => {
   const [templateWindow, setTemplateWindow] = useState()
+  const [didShow, setDidShow] = useState(false)
+
+  if (show && !didShow) {
+    setDidShow(true)
+  }
 
   // Data Updates
   useEffect(() => {
@@ -230,10 +246,10 @@ const TemplatePreview = ({ name, show, dispatch, layer, data, ...props }) => {
 
     if (show) {
       templateWindow.play()
-    } else {
+    } else if (didShow) {
       templateWindow.stop()
     }
-  }, [templateWindow, show])
+  }, [templateWindow, show, didShow])
 
   return (
     <iframe
@@ -262,3 +278,12 @@ const TemplatePreview = ({ name, show, dispatch, layer, data, ...props }) => {
     />
   )
 }
+
+let root 
+
+if (!root) {
+  root = createRoot(document.getElementById('root'))
+}
+
+root.render(<App />)
+

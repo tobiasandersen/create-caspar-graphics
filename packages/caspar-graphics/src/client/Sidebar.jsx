@@ -3,7 +3,6 @@ import styles from './sidebar.module.css'
 import { MdArrowDropDown, MdChevronRight } from 'react-icons/md'
 import { FiArrowRight, FiArrowRightCircle } from 'react-icons/fi'
 import { Switch } from './Switch'
-import { States } from '../../'
 import * as Collapsible from '@radix-ui/react-collapsible'
 import { Input } from './Input'
 import { Checkbox } from './Checkbox'
@@ -88,7 +87,7 @@ const Template = ({
   onSettingsChange,
   enabled,
   open,
-  tab
+  tab = 'data'
 }) => {
   const [pending, setPending] = useState()
   const currentPreset = presets?.find(([key]) => key === preset)
@@ -105,7 +104,10 @@ const Template = ({
         dispatch({ type: 'toggle-open', template: name })
       }}
     >
-      <div className={styles.header} data-state={enabled ? 'enabled' : 'disabled'}>
+      <div
+        className={styles.header}
+        data-state={enabled ? 'enabled' : 'disabled'}
+      >
         <Collapsible.Trigger className={styles.trigger}>
           <MdChevronRight />
           <span>{manifest?.name || name}</span>
@@ -130,7 +132,7 @@ const Template = ({
       <Collapsible.Content className={styles.content}>
         <Tabs.Root
           className={styles.tabs}
-          value={tab || 'data'}
+          value={tab}
           onValueChange={tab => {
             dispatch({ type: 'select-tab', template: name, tab })
           }}
@@ -228,12 +230,26 @@ const Template = ({
           <Tabs.Content className={styles.tabContent} value="data">
             <form
               className={styles.data}
+              onKeyDown={evt => {
+                if (
+                  (evt.key === 's' && evt.metaKey) ||
+                  (!showJson && evt.key === 'Enter')
+                ) {
+                  evt.preventDefault()
+
+                  dispatch({
+                    type: 'caspar-update',
+                    template: name,
+                    data: pending || data
+                  })
+                }
+              }}
               onSubmit={evt => {
                 evt.preventDefault()
               }}
             >
-              {showJson ? (
-                <JsonEditor value={currentData} onChange={setPending} />
+              {showJson || !Object.keys(schema || {}).length ? (
+                <JsonEditor value={currentData || {}} onChange={setPending} />
               ) : (
                 Object.entries(schema).map(([key, property]) => {
                   const onChange = value => {

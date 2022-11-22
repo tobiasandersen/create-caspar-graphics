@@ -35,6 +35,7 @@
 }
 
 .empty {
+  background: var(--neutral1);
   display: grid;
   align-content: center;
   justify-items: center;
