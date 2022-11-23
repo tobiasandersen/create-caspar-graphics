@@ -19,7 +19,6 @@ import {
   MenuLabel,
   MenuSeparator
 } from './Menu'
-import isPlainObject from 'lodash/isPlainObject'
 import { getPresets } from './'
 import { IoIosSettings } from 'react-icons/io'
 import { TemplateSettings, GeneralSettings } from './Settings'
@@ -159,7 +158,7 @@ const Template = ({
                     dispatch({
                       type: 'caspar-update',
                       template: name,
-                      data: pending
+                      data: currentData
                     })
                     setPending(null)
                   }}
@@ -212,10 +211,7 @@ const Template = ({
                       </MenuItem>
                     )}
                     <MenuItem
-                      disabled={
-                        isPlainObject(pending) &&
-                        Object.keys(pending).length === 0
-                      }
+                      disabled={currentData == null || !Object.keys(currentData).length}
                       onSelect={() => {
                         setPending({})
                       }}

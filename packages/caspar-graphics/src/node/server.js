@@ -6,7 +6,7 @@ import chokidar from 'chokidar'
 import react from '@vitejs/plugin-react'
 import getPort from 'get-port'
 import { createServer as createViteServer } from 'vite'
-import paths from '../../config/paths.js'
+import paths from './paths.js'
 
 const watcher = chokidar.watch(
   paths.appTemplates + '/**/(index.html|manifest.json)',
@@ -19,7 +19,7 @@ const watcher = chokidar.watch(
   }
 )
 
-export async function createServer({ host }) {
+export async function createServer({ name, host }) {
   const templatesPort = await getPort({ port: 5173 })
   const templatesServer = await createViteServer({
     root: paths.appTemplates,
@@ -37,7 +37,7 @@ export async function createServer({ host }) {
     plugins: [react()]
   })
   const previewServer = await createViteServer({
-    root: paths.ownPath,
+    root: paths.ownClient,
     clearScreen: false,
     server: {
       open: '/',
@@ -51,11 +51,9 @@ export async function createServer({ host }) {
     }
   })
 
-  const pkg = JSON.parse(fs.readFileSync(paths.appPackageJson))
-
   previewServer.ws.on('cg:preview-ready', (data, client) => {
     client.send('cg:update', {
-      projectName: pkg.name,
+      projectName: name,
       templates: getTemplates()
     })
 

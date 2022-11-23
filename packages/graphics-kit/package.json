@@ -3,12 +3,12 @@
   "version": "1.0.0-alpha.17.1",
   "license": "MIT",
   "main": "dist/@nxtedition/graphics-kit.cjs.js",
-  "module": "dist/es/src/index.js",
+  "module": "dist/es/index.js",
   "exports": {
     "package.json": "./package.json",
     "require": "./dist/@nxtedition/graphics-kit.cjs.js",
-    "import": "./dist/es/src/index.js",
-    "default": "./dist/es/src/index.js"
+    "import": "./dist/es/index.js",
+    "default": "./dist/es/index.js"
   },
   "author": "nxtedition",
   "repository": "https://github.com/nxtedition/create-caspar-graphics",
@@ -18,7 +18,6 @@
     "prepublishOnly": "rollup --config"
   },
   "dependencies": {
-    "fast-xml-parser": "^4.0.11",
     "fontfaceobserver": "^2.1.0",
     "gsap": "^3.3.0",
     "htmlparser2": "^7.1.2"

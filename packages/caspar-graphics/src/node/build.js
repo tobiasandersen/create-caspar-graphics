@@ -1,13 +1,14 @@
 import { build as buildVite } from 'vite'
-import paths from '../../config/paths.js'
-import chokidar from 'chokidar'
 import { resolve } from 'path'
+import chokidar from 'chokidar'
 import legacy from '@vitejs/plugin-legacy'
+import paths from './paths.js'
+
+const watcher = chokidar.watch(paths.appTemplates + '/**/index.html', {
+  depth: 1
+})
 
 async function getTemplates() {
-  const watcher = chokidar.watch(paths.appTemplates + '/**/index.html', {
-    depth: 1
-  })
   return new Promise(resolve => {
     watcher.on('ready', () => {
       resolve(Object.keys(watcher.getWatched()))
@@ -16,26 +17,30 @@ async function getTemplates() {
 }
 
 export async function build({ include }) {
-  console.log({ include })
   const allTemplates = await getTemplates()
   for (const path of allTemplates) {
   }
+  // TODO: remove non-legacy modules
+  // https://github.com/vitejs/vite/pull/10139#issuecomment-1322099215
   await buildVite({
     root: resolve(paths.appTemplates, 'lowerthird'),
     base: '',
+    // TODO: only when symlinked?
+    resolve: {
+      dedupe: ['react', 'react-dom'],
+      react: resolve(paths.appNodeModules, 'react'),
+      'react-dom': resolve(paths.appNodeModules, 'react-dom')
+    },
     build: {
       minify: false,
-      // target: 'chrome63',
-      manifest: false,
-      outDir: 'dist',
-      // emptyOutDir: true,
-      rollupOptions: {
-        treeshake: false
-      }
+      manifest: true,
+      outDir: 'dist'
     },
     plugins: [
       legacy({
-        targets: ['Chrome 60']
+        // Caspar v2.3.2
+        // TODO: make this configurable
+        targets: ['Chrome 71']
       })
     ]
   })

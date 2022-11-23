@@ -31,6 +31,10 @@ function App() {
           projectName: projectName ?? data?.projectName,
           templates
         }))
+        
+        if (projectName) {
+          document.title = `${projectName} | Caspar Graphics`
+        }
       })
     }
   }, [])
@@ -117,7 +121,7 @@ function reducer(state, action) {
 }
 
 export function getPresets(data) {
-  if (!isPlainObject(data)) {
+  if (!data) {
     return null
   }
 

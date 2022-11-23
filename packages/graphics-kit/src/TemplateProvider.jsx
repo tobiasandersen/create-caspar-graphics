@@ -1,14 +1,14 @@
 import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react'
-import * as ReactDOM from 'react-dom/client';
-import { parse } from '../utils/parse'
+import * as ReactDOM from 'react-dom/client'
 import { usePrevious } from './use-previous'
+import { parse } from './utils/parse'
 
 export const TemplateContext = React.createContext()
 
 let root
 
-export const render = (Template, options = {}) => {
-  let { container = document.getElementById('root') } = options
+export const render = (Template, options) => {
+  let { container = document.getElementById('root'), cssReset = true } = options || {}
 
   if (!container) {
     container = document.createElement('div')
@@ -16,9 +16,14 @@ export const render = (Template, options = {}) => {
     document.body.appendChild(container)
   }
 
-  document.head.insertAdjacentHTML('beforeend', `<meta name="viewport" content="width=device-width, initial-scale=1.0" />`)
+  if (cssReset) {
+    document.body.style.width = '100vw'
+    document.body.style.height = '100vh'
+    document.body.style.overflow = 'hidden'
+    document.body.style.margin = '0'
+  }
 
-  if (!root)  {
+  if (!root) {
     root = ReactDOM.createRoot(container)
   }
 
@@ -60,16 +65,13 @@ export const TemplateProvider = ({ children, name }) => {
       logger('.stop()')
     }
 
-    window.update = data => {
-      try {
-        data = typeof data === 'string' ? parse(data) : data
-      } catch (err) {
-        console.error(err)
-      }
-
-      logger(`.update(${data ? JSON.stringify(data || {}, null, 2) : 'null'})`)
+    window.update = payload => {
+      const data = typeof payload === 'string' ? parse(payload) : payload
 
       if (data) {
+        logger(
+          `.update(${data ? JSON.stringify(data || {}, null, 2) : 'null'})`
+        )
         setData(data)
       }
     }
@@ -116,7 +118,8 @@ export const TemplateProvider = ({ children, name }) => {
     <TemplateContext.Provider
       value={{
         data: memoizedData,
-        state: delays.length > 0 && state === States.playing ? prevState : state,
+        state:
+          delays.length > 0 && state === States.playing ? prevState : state,
         name,
         safeToRemove,
         delayPlay
