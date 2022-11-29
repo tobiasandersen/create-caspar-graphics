@@ -8,12 +8,6 @@ const resolveApp = relativePath => path.resolve(appDirectory, relativePath)
 const resolveOwn = relativePath =>
   path.resolve(__dirname, '../../', relativePath)
 
-const nodePaths = (process.env.NODE_PATH || '')
-  .split(process.platform === 'win32' ? ';' : ':')
-  .filter(Boolean)
-  .filter(folder => !path.isAbsolute(folder))
-  .map(resolveApp)
-
 const appPath = resolveApp('.')
 const appNodeModules = resolveApp('node_modules')
 
@@ -23,10 +17,7 @@ export default {
   appBuild: resolveApp('dist'),
   appPackageJson: resolveApp('package.json'),
   appTemplates: resolveApp('templates'),
-  ownPath: resolveOwn('.'),
   ownClient: resolveOwn('./src/client'),
   ownPackageJson: resolveOwn('package.json'),
-  ownNodeModules: resolveOwn('node_modules'),
-  useYarn: fs.existsSync(path.join(appPath, 'yarn.lock')),
-  viteBuild: path.join(appNodeModules, '.caspar-graphics', 'build')
+  ownBuild: path.join(appNodeModules, '.caspar-graphics')
 }

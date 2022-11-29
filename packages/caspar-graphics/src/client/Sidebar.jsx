@@ -21,7 +21,7 @@ import {
 } from './Menu'
 import { getPresets } from './'
 import { IoIosSettings } from 'react-icons/io'
-import { TemplateSettings, GeneralSettings } from './Settings'
+import { TopSettings, BottomSettings } from './Settings'
 import { JsonEditor } from './JsonEditor'
 import * as Tabs from '@radix-ui/react-tabs'
 
@@ -43,29 +43,33 @@ export const Sidebar = ({ state, dispatch, settings, onSettingsChange }) => {
   }, [colorMode])
 
   return (
-    <div className={styles.sidebar}>
-      <TemplateSettings
+    <div className={styles.sidebar} data-show={Boolean(settings.showSidebar)}>
+      <TopSettings
         value={settings}
         onChange={onSettingsChange}
         colorMode={colorMode}
       />
-      <div className={styles.templates}>
-        {templates.map(template => (
-          <Template
-            key={template.name}
-            showJson={settings.showJson}
-            dispatch={dispatch}
-            settings={settings}
-            onSettingsChange={onSettingsChange}
-            {...template}
+      {settings.showSidebar && (
+        <>
+          <div className={styles.templates}>
+            {templates.map(template => (
+              <Template
+                key={template.name}
+                showJson={settings.showJson}
+                dispatch={dispatch}
+                settings={settings}
+                onSettingsChange={onSettingsChange}
+                {...template}
+              />
+            ))}
+          </div>
+          <BottomSettings
+            value={settings}
+            onChange={onSettingsChange}
+            colorMode={colorMode}
           />
-        ))}
-      </div>
-      <GeneralSettings
-        value={settings}
-        onChange={onSettingsChange}
-        colorMode={colorMode}
-      />
+        </>
+      )}
     </div>
   )
 }
@@ -211,7 +215,9 @@ const Template = ({
                       </MenuItem>
                     )}
                     <MenuItem
-                      disabled={currentData == null || !Object.keys(currentData).length}
+                      disabled={
+                        currentData == null || !Object.keys(currentData).length
+                      }
                       onSelect={() => {
                         setPending({})
                       }}
@@ -252,8 +258,8 @@ const Template = ({
                     setPending({ ...currentData, [key]: value })
                   }
 
+                  let type = property.type
                   const value = currentData?.[key]
-                  const type = property.type
                   const props = {
                     key,
                     id: key,
@@ -264,6 +270,10 @@ const Template = ({
 
                   if (type === 'boolean') {
                     return <Checkbox {...props} />
+                  }
+
+                  if (type === 'image') {
+                    type = 'string'
                   }
 
                   return <Input {...props} value={value || ''} type={type} />

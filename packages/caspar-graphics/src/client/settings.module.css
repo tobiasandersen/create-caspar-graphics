@@ -4,7 +4,7 @@
   padding: 7px var(--space-ui);
   box-sizing: border-box;
   display: flex;
-  gap: 15px;
+  gap: 12px;
   font-size: 11px;
 }
 
@@ -60,9 +60,12 @@
 
 .menuButton {
   font-size: 22px;
-  margin-right: auto;
-  position: relative;
-  left: -7px;
+  margin-left: auto;
+}
+
+.settingsButton {
+  font-size: 18px;
+  margin-left: -7px;
 }
 
 .colorPicker {
@@ -84,44 +87,24 @@
   border-radius: 2px;
 }
 
-.opacityInput {
-  flex-direction: column;
-  align-items: flex-start;
-  width: 160px;
-}
-
-.opacityInput > div {
+.settingsContent {
+  background: var(--neutral3);
+  width: 230px;
+  border-radius: 4px;
+  padding: var(--space-ui);
+  box-shadow: var(--shadow);
+  margin-top: 2px;
   display: flex;
-  width: 100%;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 15px;
 }
 
-
-.numberInput {
+.settingsContent h2 {
+  font-size: 13px;
   font-weight: 600;
-  border: none;
-  width: 30px;
-  text-align: center;
-  padding: 4px 0;
-  border-radius: 2px;
-  border: 1px solid transparent;
-  margin-top: -5px;
-}
-
-.numberInput::-webkit-inner-spin-button {
-  display: none;
-}
-
-.numberInput:hover {
-  border: 1px solid #ddd;
-}
-
-.numberInput:focus {
-  border: 1px solid #0275ff;
-}
-
-.rangeInput {
-  margin-top: 5px;
-  display: block;
-  width: 100%;
+  color: var(--neutral11);
+  margin: 0;
+  border-bottom: 1px solid var(--neutral5);
+  padding-bottom: 8px;
+  line-height: 1;
 }

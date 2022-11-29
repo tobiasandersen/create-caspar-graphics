@@ -5,7 +5,6 @@ import React, {
   useEffect,
   useLayoutEffect
 } from 'react'
-import { createRoot } from 'react-dom/client'
 import isPlainObject from 'lodash/isPlainObject'
 import { Screen } from './Screen'
 import { Sidebar } from './Sidebar'
@@ -20,7 +19,7 @@ const States = {
   stopped: 3
 }
 
-function App() {
+export default function App() {
   const [data, setData] = useState()
 
   useEffect(() => {
@@ -55,8 +54,6 @@ function App() {
 }
 
 function reducer(state, action) {
-  // console.log(action)
-
   if (!action.template) {
     console.warn('The action you just dispatched is missing template:', action)
     return state
@@ -91,7 +88,7 @@ function reducer(state, action) {
     case 'hide':
       return updateTemplate({ show: false })
     case 'removed':
-      return updateTemplate({ state: States.loading })
+      return updateTemplate({ state: States.loading, removed: (template.removed ?? 0) + 1 })
     case 'preset-change':
       const payload = { preset: action.preset }
 
@@ -176,6 +173,7 @@ function Preview({
   const [persistedState, setPersistetState] = usePersistentValue(
     `cg.${projectName}`,
     {
+      showSidebar: true,
       autoPlay: false,
       background: '#21ECAF',
       imageOpacity: 0.5,
@@ -215,7 +213,7 @@ function Preview({
           .filter(template => template.enabled)
           .map(template => (
             <TemplatePreview
-              key={template.name}
+              key={template.name + template.removed}
               dispatch={dispatch}
               {...template}
             />
@@ -274,6 +272,7 @@ const TemplatePreview = ({ name, show, dispatch, layer, data, ...props }) => {
         // Once the template has animated off, we want to reload it.
         // This is to imitate Caspar's remove method.
         contentWindow.remove = () => {
+          console.log('REMOVED')
           contentWindow.location.reload()
           setTemplateWindow(null)
           dispatch({ type: 'removed', template: name })
@@ -282,12 +281,4 @@ const TemplatePreview = ({ name, show, dispatch, layer, data, ...props }) => {
     />
   )
 }
-
-let root 
-
-if (!root) {
-  root = createRoot(document.getElementById('root'))
-}
-
-root.render(<App />)
 

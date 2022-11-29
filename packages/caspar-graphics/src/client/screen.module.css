@@ -4,7 +4,10 @@
   align-self: stretch;
   justify-self: center;
   position: relative;
-  width: 96%;
+  margin: var(--space-ui);
+  box-sizing: border-box;
+  width: calc(100% - 2 * var(--space-ui));
+  height: calc(100% - 2 * var(--space-ui));
 }
 
 .screen {

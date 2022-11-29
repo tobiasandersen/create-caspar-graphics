@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 import fs from 'fs'
 import chalk from 'chalk'
 import { cac } from 'cac'
@@ -8,7 +6,9 @@ import paths from './paths.js'
 const cli = cac()
 const ownPkg = JSON.parse(fs.readFileSync(paths.ownPackageJson))
 const appPkg = JSON.parse(fs.readFileSync(paths.appPackageJson))
+
 const getOptions = clOptions => ({
+  version: ownPkg.version,
   name: appPkg.name,
   ...(appPkg.casparGraphics || {}),
   ...clOptions
@@ -37,8 +37,13 @@ cli
 // Build
 cli
   .command('build [root]', 'build for production')
-  .option('-i, --include', '[string] build specified templates')
+  .option('-i, --include [...templates]', 'templates included in this build')
+  .option(
+    '--target',
+    '[string] browser compatibility target for the final bundle'
+  )
   .option('--manifest', '[boolean] emit build manifest json')
+  .option('--gzip', '[boolean] gzip final bundle')
   .action(async (root, options) => {
     const { build } = await import('./build.js')
     const templates = await build(getOptions(options))

@@ -1,5 +1,3 @@
-// #!/usr/bin/env node
-
 import fs from 'fs'
 import path from 'path'
 import chokidar from 'chokidar'
@@ -25,6 +23,12 @@ export async function createServer({ name, host }) {
     root: paths.appTemplates,
     clearScreen: false,
     base: '/templates/',
+    resolve: {
+      alias: {
+        // NOTE: this is required when graphics-kit is linked.
+        'react-dom': path.resolve(paths.appNodeModules, 'react-dom')
+      }
+    },
     server: {
       port: templatesPort,
       fs: {

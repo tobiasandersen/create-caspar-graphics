@@ -1,14 +1,24 @@
-import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react'
+import React, {
+  useEffect,
+  useLayoutEffect,
+  useState,
+  useCallback,
+  useMemo,
+  useRef
+} from 'react'
 import * as ReactDOM from 'react-dom/client'
-import { usePrevious } from './use-previous'
 import { parse } from './utils/parse'
 
 export const TemplateContext = React.createContext()
 
-let root
+let root = null
 
 export const render = (Template, options) => {
-  let { container = document.getElementById('root'), cssReset = true } = options || {}
+  let {
+    container = document.getElementById('root'),
+    cssReset = true,
+    name = Template.name
+  } = options || {}
 
   if (!container) {
     container = document.createElement('div')
@@ -17,10 +27,14 @@ export const render = (Template, options) => {
   }
 
   if (cssReset) {
-    document.body.style.width = '100vw'
-    document.body.style.height = '100vh'
-    document.body.style.overflow = 'hidden'
-    document.body.style.margin = '0'
+    const reset = ` 
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      margin: 0;
+    `
+    document.body.style.cssText = reset
+    container.style.cssText = reset
   }
 
   if (!root) {
@@ -28,30 +42,45 @@ export const render = (Template, options) => {
   }
 
   root.render(
-    React.createElement(TemplateProvider, {}, React.createElement(Template))
+    React.createElement(
+      TemplateProvider,
+      { name },
+      React.createElement(Template)
+    )
   )
 }
 
-export const TemplateProvider = ({ children, name }) => {
+const TemplateProvider = ({ children, name }) => {
   const [state, setState] = useState(States.loading)
-  const [data, setData] = useState()
+  const [data, setData] = useState({})
   const [delays, setDelays] = useState([])
-  const prevState = usePrevious(state)
+  const [resume, setResume] = useState()
+  const [requestPlay, setRequestPlay] = useState(false)
 
-  const logger = (message, ...rest) => {
-    console.log(`${name || 'caspar'}${message}`)
-    rest && rest.length && console.log(rest)
+  const logger = message => {
+    console.log(`${name || ''}${message}`)
   }
+
+  const delayPlay = useCallback(key => {
+    setDelays(delays => [...delays, key])
+
+    return () => {
+      setDelays(delays => delays.filter(delay => delay !== key))
+    }
+  }, [])
 
   // Handle state and data updates
   useEffect(() => {
+    let didPlay = false
+
     window.load = () => {
       setState(States.loaded)
       logger('.load()')
     }
 
     window.play = () => {
-      setState(States.playing)
+      didPlay = true
+      setRequestPlay(true)
       logger('.play()')
     }
 
@@ -72,7 +101,13 @@ export const TemplateProvider = ({ children, name }) => {
         logger(
           `.update(${data ? JSON.stringify(data || {}, null, 2) : 'null'})`
         )
+
         setData(data)
+
+        if (!didPlay) {
+          const delay = delayPlay('__initialData')
+          setResume(() => delay)
+        }
       }
     }
 
@@ -88,6 +123,19 @@ export const TemplateProvider = ({ children, name }) => {
     }
   }, [])
 
+  // If we received an update before the play command, we want to wait for its render cycle to
+  // finish before we check if there are any registered delays.
+  React.useEffect(() => {
+    resume?.()
+  }, [resume])
+
+  // Wait for any delays to finish before playing.
+  React.useEffect(() => {
+    if (state < States.playing && requestPlay && !delays.length) {
+      setState(States.playing)
+    }
+  }, [state, data, requestPlay, delays])
+
   // Remove template
   useEffect(() => {
     if (state === States.removed) {
@@ -100,26 +148,11 @@ export const TemplateProvider = ({ children, name }) => {
     setState(States.removed)
   }, [])
 
-  const idRef = useRef(0)
-
-  const delayPlay = useCallback(() => {
-    const id = idRef.current++
-    setDelays(delays => [...delays, id])
-
-    return () => {
-      setDelays(delays => delays.filter(delay => delay !== id))
-    }
-  }, [])
-
-  // Make sure the data object doesn't change unless there's actually new data.
-  const memoizedData = useMemo(() => data || {}, [JSON.stringify(data || {})])
-
   return (
     <TemplateContext.Provider
       value={{
-        data: memoizedData,
-        state:
-          delays.length > 0 && state === States.playing ? prevState : state,
+        data,
+        state,
         name,
         safeToRemove,
         delayPlay
@@ -165,6 +198,37 @@ export const useCasparData = () => {
   return React.useContext(TemplateContext).data
 }
 
-export const useDelayPlay = () => {
-  return React.useContext(TemplateContext).delayPlay
+export const useDelayPlay = ({ key }) => {
+  const [delayedValue, setDelayedValue] = useState()
+  const { delayPlay } = React.useContext(TemplateContext)
+  const resumeRef = useRef()
+
+  // Reset when key changes
+  useEffect(() => {
+    setDelayedValue(null)
+  }, [key])
+
+  useLayoutEffect(() => {
+    if (!key) {
+      return
+    }
+
+    const resume = delayPlay(key)
+    resumeRef.current = resume
+
+    return () => {
+      resumeRef.current = null
+      resume()
+    }
+  }, [delayPlay, key])
+
+  const resume = useCallback(
+    value => {
+      setDelayedValue(value)
+      resumeRef.current?.()
+    },
+    [key]
+  )
+
+  return [delayedValue, resume]
 }

@@ -35,15 +35,8 @@ export const useFontObserver = (...args) => {
 }
 
 export function useFont({ src, weight, style }) {
-  const [font, setFont] = useState()
-  const delayPlay = useDelayPlay()
-  const resumeRef = useRef()
-
-  useEffect(() => {
-    resumeRef.current = delayPlay()
-  }, [delayPlay])
-
-  const key = src ? JSON.stringify(src) : ''
+  const key = src ? JSON.stringify(src) : null
+  const [font, resume] = useDelayPlay({ key })
 
   useLayoutEffect(() => {
     const fonts = Array.isArray(src) ? src : [{ path: src, weight, style }]
@@ -65,8 +58,7 @@ export function useFont({ src, weight, style }) {
         })
       )
 
-      setFont(fontFaces[0].family)
-      resumeRef.current()
+      resume(fontFaces[0].family)
     }
 
     try {
@@ -74,7 +66,7 @@ export function useFont({ src, weight, style }) {
     } catch (err) {
       console.error('Failed to load font ' + name + ':', err)
     }
-  }, [key, weight, style])
+  }, [key, weight, style, resume])
 
   return {
     style: { fontFamily: font, visibility: font ? 'visible' : 'hidden' }

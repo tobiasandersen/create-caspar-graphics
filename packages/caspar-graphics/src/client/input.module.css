@@ -22,3 +22,8 @@
 .input:hover {
   border-color: var(--neutral8);
 }
+
+.input:focus {
+  border-color: var(--primary10);
+  outline: none;
+}
