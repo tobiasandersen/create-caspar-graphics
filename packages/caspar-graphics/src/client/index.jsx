@@ -189,6 +189,7 @@ function reducer(state, action) {
     case 'toggle-open':
       return updateTemplate({ open: !template.open })
     case 'show':
+      // TODO: wait for `removed` to arrive before allowing show a second time.
       return updateTemplate({ show: true })
     case 'hide':
       return updateTemplate({ show: false })

@@ -5,7 +5,8 @@
   "private": true,
   "scripts": {
     "dev": "caspar-graphics start --mode dev",
-    "examples": "caspar-graphics start"
+    "examples": "caspar-graphics start",
+    "build": "caspar-graphics build"
   },
   "dependencies": {
     "@nxtedition/caspar-graphics": "*",
