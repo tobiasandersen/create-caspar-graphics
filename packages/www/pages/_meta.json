@@ -10,5 +10,19 @@
   "docs": {
     "type": "page",
     "title": "Documentation"
+  },
+  "examples": {
+    "type": "page",
+    "title": "Examples",
+    "theme": {
+      "layout": "raw"
+    }
+  },
+  "about": {
+    "type": "page",
+    "title": "About",
+    "theme": {
+      "typesetting": "article"
+    }
   }
 }

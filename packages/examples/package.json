@@ -1,13 +1,13 @@
 {
   "name": "@nxtedition/caspar-graphics-examples",
-  "version": "1.0.0-alpha.0",
+  "version": "1.0.0-beta.0",
   "license": "MIT",
   "private": true,
   "scripts": {
     "dev": "caspar-graphics start --mode dev",
     "examples": "caspar-graphics start",
     "serve": "next start",
-    "build": "caspar-graphics build"
+    "build": "caspar-graphics build --target vercel"
   },
   "dependencies": {
     "@nxtedition/caspar-graphics": "*",

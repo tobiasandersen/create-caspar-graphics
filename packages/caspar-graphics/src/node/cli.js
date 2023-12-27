@@ -56,7 +56,7 @@ cli
   .option('--outDir <outDir>' , '[string] output directory (relative to project root).')
   .action(async (root, options) => {
     const { build } = await import('./build.js')
-    const templates = await build(getOptions(options))
+    await build(getOptions(options))
     process.exit(0)
   })
 

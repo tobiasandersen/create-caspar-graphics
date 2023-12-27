@@ -1,6 +1,7 @@
 import { build as buildVite } from 'vite'
 import fs from 'node:fs'
-import { resolve, join } from 'node:path'
+import { join } from 'node:path'
+import { writeFile, copyFile, cp } from 'node:fs/promises'
 import chokidar from 'chokidar'
 import paths from './paths.js'
 import chalk from 'chalk'
@@ -9,7 +10,8 @@ import { viteSingleFile } from 'vite-plugin-singlefile'
 
 const TARGETS = {
   'ccg2.3.3': 'chrome71',
-  nxt: 'chrome71'
+  nxt: 'chrome71',
+  vercel: 'chrome71'
 }
 
 export async function build({
@@ -39,7 +41,7 @@ export async function build({
     },
     build: {
       target: TARGETS[target] || target,
-      minify: false,
+      minify: true,
       manifest: false,
       outDir: join(paths.appPath, outDir, name),
       emptyOutDir: true
@@ -57,26 +59,22 @@ export async function build({
 
   console.log(
     chalk.cyan(`Caspar Graphics v${version}`) +
-    ' ' +
-    chalk.green(
-      `building ${templates.length} template${templates.length === 1 ? '' : 's'
-      }...`
-    )
+      ' ' +
+      chalk.green(
+        `building ${templates.length} template${
+          templates.length === 1 ? '' : 's'
+        }...`
+      )
   )
 
-  return Promise.all(
+  await Promise.all(
     templates.map(async ([name, path]) => {
       try {
         await buildVite(getConfig(name, path))
 
-        if (target.startsWith('nxt')) {
-          console.log(
-            'copy',
-            join(path, 'manifest.json'),
-            join(paths.appPath, outDir, name, 'manifest.json')
-          )
+        if (target.startsWith('nxt') || target === 'vercel') {
           try {
-            await fs.copyFile(
+            await copyFile(
               join(path, 'manifest.json'),
               join(paths.appPath, outDir, name, 'manifest.json')
             )
@@ -101,6 +99,11 @@ export async function build({
       }
     })
   )
+
+  if (target === 'vercel') {
+    const json = JSON.stringify({ templates: templates.map(([name]) => name) })
+    await writeFile(join(paths.appPath, outDir, 'data.json'), json, 'utf8')
+  }
 }
 
 const watcher = chokidar.watch(paths.appTemplates + '/**/index.html', {
