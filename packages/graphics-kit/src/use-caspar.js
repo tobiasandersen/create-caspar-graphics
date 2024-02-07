@@ -4,25 +4,28 @@ import React, {
   useState,
   useCallback,
   useRef,
-  useMemo
+  useMemo,
 } from 'react'
 import { TemplateContext } from './TemplateProvider'
 import { States } from './constants'
 import { useTimeout } from './use-timeout'
 
-export const useCaspar = opts => {
-  const { state, safeToRemove, ...context } = React.useContext(TemplateContext)
+export const useCaspar = (opts) => {
+  const { state, safeToRemove, size, ...context } =
+    React.useContext(TemplateContext)
   const data = useCasparData(opts)
 
   useTimeout(safeToRemove, opts?.removeDelay)
 
   return {
     ...context,
+    size,
+    aspectRatio: size.width / size.height,
     data,
     state,
     safeToRemove,
     isPlaying: state === States.playing,
-    isStopped: state === States.stopped
+    isStopped: state === States.stopped,
   }
 }
 
@@ -30,7 +33,7 @@ export const useCasparState = () => {
   return React.useContext(TemplateContext).state
 }
 
-export const useCasparData = opts => {
+export const useCasparData = (opts) => {
   const { data } = React.useContext(TemplateContext)
   const { trim = true } = opts || {}
 
@@ -49,7 +52,7 @@ export const useCasparData = opts => {
   }, [data, trim])
 }
 
-export const useMergedData = opts => {
+export const useMergedData = (opts) => {
   const data = useCasparData(opts)
   const ref = useRef({})
 
@@ -85,11 +88,11 @@ export const useDelayPlay = ({ key }) => {
   }, [delayPlay, key])
 
   const resume = useCallback(
-    value => {
+    (value) => {
       setDelayedValue(value)
       resumeRef.current?.()
     },
-    [key]
+    [key],
   )
 
   return [delayedValue, resume]

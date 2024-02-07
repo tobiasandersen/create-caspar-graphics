@@ -1,0 +1,24 @@
+{
+  "name": "Responsive",
+  "height": 1080,
+  "schema": {
+    "name": {
+      "type": "string",
+      "label": "Name"
+    },
+    "title": {
+      "type": "string",
+      "label": "Title"
+    }
+  },
+  "previewData": {
+    "Thierry Henry": {
+      "name": "Thierry Henry",
+      "title": "King of Highbury"
+    },
+    "Dennis Bergkamp": {
+      "name": "Dennis Bergkamp",
+      "title": "Non-flying Dutchman"
+    }
+  }
+}
